@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duplex PDF Printer</title>
+    <!-- Using Vite to bundle pdf-lib locally -->
+    <style>
+        /* İstenilen aşırı minimal tasarım */
+        body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; color: #333; line-height: 1.5; }
+        .box { border: 2px dashed #999; padding: 2rem; text-align: center; margin: 1rem 0; cursor: pointer; border-radius: 4px; }
+        .box.dragover { border-color: #000; background: #f0f0f0; }
+        fieldset { margin-bottom: 1.5rem; padding: 1rem; border: 1px solid #ccc; border-radius: 4px; }
+        legend { font-weight: bold; }
+        .hidden { display: none; }
+        .result-section { margin-top: 1.5rem; padding: 1.5rem; border: 1px solid #ccc; border-radius: 4px; background: #fafafa; }
+        .actions { margin-top: 1rem; display: flex; gap: 1rem; }
+        button { padding: 0.5rem 1rem; cursor: pointer; font-size: 1rem; border: 1px solid #666; background: #fff; border-radius: 3px; }
+        button:hover { background: #eee; }
+        label { display: block; margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body>
+    <h1>Duplex PDF Converter</h1>
+    <p>Convert your PDFs into Side 1 and Side 2 files for manual duplex printing.</p>
+    
+    <fieldset>
+        <legend>Printer Calibration (Auto-saves to local storage)</legend>
+        <div style="margin-bottom: 1rem;">
+            <strong>1. How does your printer stack output pages?</strong><br>
+            <label>
+                <input type="radio" name="outputTray" value="facedown" checked> 
+                Face Down (Standard Laser - First page ends up at the bottom of the stack)
+            </label>
+            <label>
+                <input type="radio" name="outputTray" value="faceup"> 
+                Face Up (Standard Inkjet - First page ends up at the top of the stack)
+            </label>
+        </div>
+        <div>
+            <strong>2. How do you flip the printed pages to put them back?</strong><br>
+            <label>
+                <input type="radio" name="flipEdge" value="long" checked> 
+                Long Edge (Like a book - No rotation needed)
+            </label>
+            <label>
+                <input type="radio" name="flipEdge" value="short"> 
+                Short Edge (Like a calendar - Rotates Side 2 by 180 degrees)
+            </label>
+        </div>
+    </fieldset>
+
+    <div id="dropzone" class="box">
+        <strong>Drag & Drop your PDF here</strong>
+        <p>or click to select file</p>
+        <input type="file" id="fileInput" accept="application/pdf" class="hidden">
+    </div>
+
+    <div id="loading" class="hidden">
+        <em>Processing PDF... Please wait.</em>
+    </div>
+
+    <div id="results" class="hidden">
+        <div class="result-section">
+            <h2>Side 1 (Odd Pages)</h2>
+            <p>Step 1: Print this file normally.</p>
+            <div class="actions">
+                <button id="downloadSide1">Download Side 1</button>
+                <button id="printSide1">Print Side 1</button>
+            </div>
+        </div>
+
+        <div class="result-section">
+            <h2>Side 2 (Even Pages)</h2>
+            <p>Step 2: Take the printed stack from Side 1, put it back into the paper tray, and print this file.</p>
+            <div class="actions">
+                <button id="downloadSide2">Download Side 2</button>
+                <button id="printSide2">Print Side 2</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+</body>
+</html>
