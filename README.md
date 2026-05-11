@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="logo-circle.svg" alt="DuplexMe! Logo" width="128" height="128" />
+  <img src="assets/logo.circle.svg" alt="DuplexMe! Logo" width="128" height="128" />
   <h1>DuplexMe!</h1>
   <p>A minimalist, browser-based PDF utility for perfect manual duplex printing.</p>
 </div>
