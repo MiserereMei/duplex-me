@@ -92,21 +92,32 @@ async function processFile(file) {
         const side1Indices = [];
         let side2Indices = [];
 
-        // Split indices into Side 1 (Odd) and Side 2 (Even)
+        const traySetting = document.querySelector('input[name="outputTray"]:checked').value;
+
+        // Split indices into Side 1 and Side 2
         for (let i = 0; i < pageCount; i++) {
-            if (i % 2 === 0) {
-                // Indices 0, 2, 4... represent Pages 1, 3, 5...
-                side1Indices.push(i);
+            if (traySetting === 'faceup') {
+                // Face Up (Inkjet): Print Evens on Side 1, Odds on Side 2
+                // So the final printed face (Side 2) will be the Odd pages, making them face up!
+                if (i % 2 === 0) {
+                    side2Indices.push(i); // 0, 2, 4 (Pages 1, 3, 5) -> Side 2
+                } else {
+                    side1Indices.push(i); // 1, 3, 5 (Pages 2, 4, Blank) -> Side 1
+                }
             } else {
-                // Indices 1, 3, 5... represent Pages 2, 4, 6...
-                side2Indices.push(i);
+                // Face Down (Laser): Print Odds on Side 1, Evens on Side 2
+                if (i % 2 === 0) {
+                    side1Indices.push(i); // 0, 2, 4 (Pages 1, 3, 5) -> Side 1
+                } else {
+                    side2Indices.push(i); // 1, 3, 5 (Pages 2, 4, Blank) -> Side 2
+                }
             }
         }
 
-        // Rule: If Face Up printer, the output stack is sorted with the last page on top.
-        // To print on the back correctly, Side 2 must be printed in Reverse order.
-        const traySetting = document.querySelector('input[name="outputTray"]:checked').value;
-        if (traySetting === 'faceup') {
+        // The deterministic rule for manual duplexing:
+        // Face Down (Laser): Requires Side 2 to be reversed.
+        // Face Up (Inkjet): Requires Side 2 to be in normal (forward) order.
+        if (traySetting === 'facedown') {
             side2Indices.reverse();
         }
 
@@ -144,8 +155,20 @@ async function processFile(file) {
         side2BlobUrl = URL.createObjectURL(side2Blob);
 
         // Setup Download and Print Buttons
-        setupButtons('Side1', side1BlobUrl, 'Side1_OddPages.pdf');
-        setupButtons('Side2', side2BlobUrl, 'Side2_EvenPages.pdf');
+        if (traySetting === 'faceup') {
+            setupButtons('Side1', side1BlobUrl, 'Side1_EvenPages.pdf');
+            setupButtons('Side2', side2BlobUrl, 'Side2_OddPages.pdf');
+            
+            // UI text update for clarity
+            document.querySelector('#results .result-section:nth-child(1) h2').innerText = "Side 1 (Even Pages)";
+            document.querySelector('#results .result-section:nth-child(2) h2').innerText = "Side 2 (Odd Pages)";
+        } else {
+            setupButtons('Side1', side1BlobUrl, 'Side1_OddPages.pdf');
+            setupButtons('Side2', side2BlobUrl, 'Side2_EvenPages.pdf');
+            
+            document.querySelector('#results .result-section:nth-child(1) h2').innerText = "Side 1 (Odd Pages)";
+            document.querySelector('#results .result-section:nth-child(2) h2').innerText = "Side 2 (Even Pages)";
+        }
 
         loading.classList.add('hidden');
         results.classList.remove('hidden');
