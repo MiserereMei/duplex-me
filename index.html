@@ -17,39 +17,82 @@
         .actions { margin-top: 1rem; display: flex; gap: 1rem; }
         button { padding: 0.5rem 1rem; cursor: pointer; font-size: 1rem; border: 1px solid #666; background: #fff; border-radius: 3px; }
         button:hover { background: #eee; }
-        label { display: block; margin-bottom: 0.5rem; }
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+        .modal-content {
+            background: #fff; padding: 2rem; border-radius: 8px;
+            max-width: 400px; width: 90%; transform: translateY(-20px);
+            transition: transform 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .modal-overlay.open .modal-content { transform: translateY(0); }
+        
+        /* Animations */
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        #results:not(.hidden) { animation: slideIn 0.3s ease-out; }
+        #dropzone { transition: all 0.2s ease; }
+        
+        .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .header-container h1 { margin: 0; }
+        
+        /* Dark Mode */
+        @media (prefers-color-scheme: dark) {
+            body { background-color: #121212; color: #e0e0e0; }
+            .box { border-color: #555; }
+            .box.dragover { background-color: #1e1e1e; border-color: #888; }
+            .result-section { background-color: #1a1a1a; border-color: #333; }
+            button { background-color: #2a2a2a; color: #e0e0e0; border-color: #444; }
+            button:hover { background-color: #3a3a3a; }
+            .modal-content { background-color: #1a1a1a; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+            p[style] { color: #aaa !important; }
+        }
     </style>
 </head>
 <body>
-    <h1>Duplex PDF Converter</h1>
-    <p>Convert your PDFs into Side 1 and Side 2 files for manual duplex printing.</p>
+    <div class="header-container">
+        <h1>Duplex PDF</h1>
+        <button id="openSettingsBtn">⚙️ Calibration</button>
+    </div>
+    <p style="margin-bottom: 2rem; color: #555;">Convert your PDFs into Side 1 and Side 2 files for manual duplex printing.</p>
     
-    <fieldset>
-        <legend>Printer Calibration (Auto-saves to local storage)</legend>
-        <div style="margin-bottom: 1rem;">
-            <strong>1. How does your printer stack output pages?</strong><br>
-            <label>
-                <input type="radio" name="outputTray" value="facedown" checked> 
-                Face Down (Standard Laser - Side 2 will be reversed)
-            </label>
-            <br>
-            <label>
-                <input type="radio" name="outputTray" value="faceup"> 
-                Face Up (Standard Inkjet - Side 2 will be normal)
-            </label>
+    <!-- Modal -->
+    <div id="settingsModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 style="margin-top: 0;">Printer Calibration</h2>
+            <p style="font-size: 0.9rem; color: #666;">Settings auto-save to local storage.</p>
+            
+            <div style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
+                <strong>1. Output Tray Stacking</strong><br>
+                <label style="margin-top: 0.5rem;">
+                    <input type="radio" name="outputTray" value="facedown" checked> 
+                    Face Down (Laser)
+                </label>
+                <label>
+                    <input type="radio" name="outputTray" value="faceup"> 
+                    Face Up (Inkjet)
+                </label>
+            </div>
+            
+            <div style="margin-bottom: 2rem;">
+                <strong>2. Flip Orientation</strong><br>
+                <label style="margin-top: 0.5rem;">
+                    <input type="radio" name="flipEdge" value="long" checked> 
+                    Long Edge (Book)
+                </label>
+                <label>
+                    <input type="radio" name="flipEdge" value="short"> 
+                    Short Edge (Calendar)
+                </label>
+            </div>
+            
+            <button id="closeSettingsBtn" style="width: 100%;">Done</button>
         </div>
-        <div>
-            <strong>2. How do you flip the printed pages to put them back?</strong><br>
-            <label>
-                <input type="radio" name="flipEdge" value="long" checked> 
-                Long Edge (Like a book - No rotation needed)
-            </label>
-            <label>
-                <input type="radio" name="flipEdge" value="short"> 
-                Short Edge (Like a calendar - Rotates Side 2 by 180 degrees)
-            </label>
-        </div>
-    </fieldset>
+    </div>
 
     <div id="dropzone" class="box">
         <strong>Drag & Drop your PDF here</strong>

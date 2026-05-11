@@ -5,6 +5,14 @@ const fileInput = document.getElementById('fileInput');
 const loading = document.getElementById('loading');
 const results = document.getElementById('results');
 
+// Modal Logic
+const settingsModal = document.getElementById('settingsModal');
+document.getElementById('openSettingsBtn').addEventListener('click', () => settingsModal.classList.add('open'));
+document.getElementById('closeSettingsBtn').addEventListener('click', () => settingsModal.classList.remove('open'));
+settingsModal.addEventListener('click', (e) => {
+    if (e.target === settingsModal) settingsModal.classList.remove('open');
+});
+
 // Settings Elements
 const outputTrayRadios = document.querySelectorAll('input[name="outputTray"]');
 const flipEdgeRadios = document.querySelectorAll('input[name="flipEdge"]');
@@ -34,6 +42,11 @@ flipEdgeRadios.forEach(r => {
 });
 
 // 3. Handle Drag & Drop
+document.addEventListener('dragenter', () => {
+    // Hide results immediately when a user starts dragging a new file over the page
+    results.classList.add('hidden');
+});
+
 dropzone.addEventListener('dragover', (e) => {
     e.preventDefault();
     dropzone.classList.add('dragover');
@@ -52,6 +65,7 @@ dropzone.addEventListener('drop', (e) => {
 });
 
 dropzone.addEventListener('click', () => {
+    results.classList.add('hidden');
     fileInput.click();
 });
 
