@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://misereremei.github.io/duplex-me/sitemap.xml
