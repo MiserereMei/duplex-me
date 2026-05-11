@@ -1,7 +1,40 @@
 import { defineConfig } from 'vite'
+import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-  // This base path is critical for GitHub Pages where the repo name might be the sub-path
-  // e.g., https://username.github.io/repo-name/
   base: './', 
+  plugins: [
+    VitePWA({
+      registerType: 'autoUpdate',
+      injectRegister: 'auto',
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,svg,pdf}']
+      },
+      devOptions: {
+        enabled: true
+      },
+      manifest: {
+        name: 'DuplexMe!',
+        short_name: 'DuplexMe',
+        description: 'A minimalist, browser-based PDF utility for perfect manual duplex printing.',
+        theme_color: '#18181b',
+        background_color: '#18181b',
+        display: 'standalone',
+        icons: [
+          {
+            src: 'logo.svg',
+            sizes: 'any',
+            type: 'image/svg+xml',
+            purpose: 'any'
+          },
+          {
+            src: 'logo.svg',
+            sizes: '512x512',
+            type: 'image/svg+xml',
+            purpose: 'maskable'
+          }
+        ]
+      }
+    })
+  ]
 })
