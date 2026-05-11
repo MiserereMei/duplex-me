@@ -7,6 +7,8 @@ const results = document.getElementById('results');
 
 // Modal Logic
 const settingsModal = document.getElementById('settingsModal');
+const oobeModal = document.getElementById('oobeModal');
+
 document.getElementById('openSettingsBtn').addEventListener('click', () => settingsModal.classList.add('open'));
 document.getElementById('closeSettingsBtn').addEventListener('click', () => settingsModal.classList.remove('open'));
 settingsModal.addEventListener('click', (e) => {
@@ -19,15 +21,34 @@ const flipEdgeRadios = document.querySelectorAll('input[name="flipEdge"]');
 
 // 1. Load calibration settings from localStorage
 const savedTray = localStorage.getItem('duplex_tray');
-if (savedTray) {
-    outputTrayRadios.forEach(r => r.checked = (r.value === savedTray));
-}
 const savedFlip = localStorage.getItem('duplex_flip');
-if (savedFlip) {
+
+if (savedTray && savedFlip) {
+    outputTrayRadios.forEach(r => r.checked = (r.value === savedTray));
     flipEdgeRadios.forEach(r => r.checked = (r.value === savedFlip));
+} else {
+    // Show OOBE on first visit
+    oobeModal.classList.add('open');
 }
 
-// 2. Save settings automatically when changed
+// OOBE Logic
+document.getElementById('finishOobeBtn').addEventListener('click', () => {
+    const oobeTrayVal = document.querySelector('input[name="oobeTray"]:checked').value;
+    const oobeFlipVal = document.querySelector('input[name="oobeFlip"]:checked').value;
+    
+    // Save to localStorage
+    localStorage.setItem('duplex_tray', oobeTrayVal);
+    localStorage.setItem('duplex_flip', oobeFlipVal);
+    
+    // Sync to main settings
+    outputTrayRadios.forEach(r => r.checked = (r.value === oobeTrayVal));
+    flipEdgeRadios.forEach(r => r.checked = (r.value === oobeFlipVal));
+    
+    // Close OOBE
+    oobeModal.classList.remove('open');
+});
+
+// 2. Save settings automatically when changed in main settings
 outputTrayRadios.forEach(r => {
     r.addEventListener('change', () => {
         const val = document.querySelector('input[name="outputTray"]:checked').value;

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" xmlns:bx="https://boxy-svg.com">
+  <defs>
+    <filter id="drop-shadow-filter-0" bx:preset="drop-shadow 1 0 1 4 0.65 #06b6d4" color-interpolation-filters="sRGB" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
+      <feOffset dx="0" dy="1"/>
+      <feComponentTransfer result="offsetblur">
+        <feFuncA id="spread-ctrl" type="linear" slope="1.3"/>
+      </feComponentTransfer>
+      <feFlood flood-color="#06b6d4"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <title>book-album</title>
+  <desc>Created with Sketch Beta.</desc>
+  <rect y="-1.028" width="500" height="501.028" style="stroke: rgb(0, 0, 0); fill: rgb(24, 24, 27);"/>
+  <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" transform="matrix(12.23537, 0, 0, 12.23537, 31.955048, 56.215828)" style="">
+    <g id="Icon-Set-Filled" transform="translate(-414.000000, -101.000000)" fill="#000000">
+      <path d="M 422.626 104.579 C 420.934 104.579 419.562 105.951 419.562 107.643 L 419.562 123.734 C 419.562 125.426 421.006 126.272 422.626 126.799 L 431.055 129.097 L 431.055 106.877 C 427.214 105.847 422.626 104.579 422.626 104.579 Z M 441.016 104.579 C 441.016 104.579 436.581 105.8 432.55 106.877 L 432.587 106.877 L 432.587 129.097 C 436.891 127.949 441.016 126.799 441.016 126.799 C 442.589 126.392 444.08 125.426 444.08 123.734 L 444.08 107.643 C 444.08 105.951 442.708 104.579 441.016 104.579 Z" id="book-album" style="fill: rgb(228, 228, 231); filter: url(&quot;#drop-shadow-filter-0&quot;);"/>
+    </g>
+  </g>
+</svg>

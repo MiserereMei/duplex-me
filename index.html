@@ -3,68 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Duplex PDF Printer</title>
+    <title>DuplexMe!</title>
     <!-- Using Vite to bundle pdf-lib locally -->
     <style>
-        /* İstenilen aşırı minimal tasarım */
-        body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; color: #333; line-height: 1.5; }
-        .box { border: 2px dashed #999; padding: 2rem; text-align: center; margin: 1rem 0; cursor: pointer; border-radius: 4px; }
-        .box.dragover { border-color: #000; background: #f0f0f0; }
-        fieldset { margin-bottom: 1.5rem; padding: 1rem; border: 1px solid #ccc; border-radius: 4px; }
-        legend { font-weight: bold; }
+        :root {
+            --bg-color: #F4F4F5; /* Light mode bg */
+            --surface-color: #FFFFFF;
+            --text-color: #18181B;
+            --text-muted: #52525B;
+            --border-color: #E4E4E7;
+            --glow-color: rgba(6, 182, 212, 0.4);
+            --glow-border: #06B6D4;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #000000;
+                --surface-color: #18181B;
+                --text-color: #E4E4E7;
+                --text-muted: #A1A1AA;
+                --border-color: #27272A;
+                --glow-color: rgba(6, 182, 212, 0.5);
+            }
+        }
+
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; background-color: var(--bg-color); color: var(--text-color); line-height: 1.5; transition: background-color 0.3s, color 0.3s; }
+        .box { border: 2px dashed var(--border-color); padding: 2rem; text-align: center; margin: 1rem 0; cursor: pointer; border-radius: 8px; background-color: var(--surface-color); transition: all 0.3s ease; }
+        .box.dragover { border-color: var(--glow-border); box-shadow: 0 0 20px var(--glow-color); }
         .hidden { display: none; }
-        .result-section { margin-top: 1.5rem; padding: 1.5rem; border: 1px solid #ccc; border-radius: 4px; background: #fafafa; }
-        .actions { margin-top: 1rem; display: flex; gap: 1rem; }
-        button { padding: 0.5rem 1rem; cursor: pointer; font-size: 1rem; border: 1px solid #666; background: #fff; border-radius: 3px; }
-        button:hover { background: #eee; }
+        .result-section { margin-top: 1.5rem; padding: 1.5rem; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--surface-color); }
+        .actions { margin-top: 1.2rem; display: flex; gap: 1rem; }
+        button { padding: 0.6rem 1.2rem; cursor: pointer; font-size: 1rem; font-weight: 500; border: 1px solid var(--border-color); background-color: var(--surface-color); color: var(--text-color); border-radius: 6px; transition: all 0.2s ease; }
+        button:hover { border-color: var(--glow-border); box-shadow: 0 0 15px var(--glow-color); transform: translateY(-1px); }
+        button:active { transform: translateY(0); }
+        
+        /* Accent Buttons */
+        button.accent-btn { background-color: var(--glow-border); color: #FFFFFF; border-color: var(--glow-border); font-weight: 600; }
+        button.accent-btn:hover { background-color: #0891B2; border-color: #0891B2; color: #FFFFFF; }
+        
         /* Modal Styles */
         .modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5); z-index: 100;
+            background: rgba(0,0,0,0.6); z-index: 100;
             display: flex; align-items: center; justify-content: center;
             opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+            backdrop-filter: blur(2px);
         }
         .modal-overlay.open { opacity: 1; pointer-events: auto; }
         .modal-content {
-            background: #fff; padding: 2rem; border-radius: 8px;
+            background-color: var(--surface-color); padding: 2rem; border-radius: 12px;
             max-width: 400px; width: 90%; transform: translateY(-20px);
-            transition: transform 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: transform 0.2s ease; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 1px solid var(--border-color);
         }
         .modal-overlay.open .modal-content { transform: translateY(0); }
+        
+        /* Typography */
+        p.muted { color: var(--text-muted); margin-bottom: 2rem; }
+        label { display: block; margin-bottom: 0.5rem; color: var(--text-color); }
+        strong { color: var(--text-color); }
         
         /* Animations */
         @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         #results:not(.hidden) { animation: slideIn 0.3s ease-out; }
-        #dropzone { transition: all 0.2s ease; }
         
         .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
         .header-container h1 { margin: 0; }
-        
-        /* Dark Mode */
-        @media (prefers-color-scheme: dark) {
-            body { background-color: #121212; color: #e0e0e0; }
-            .box { border-color: #555; }
-            .box.dragover { background-color: #1e1e1e; border-color: #888; }
-            .result-section { background-color: #1a1a1a; border-color: #333; }
-            button { background-color: #2a2a2a; color: #e0e0e0; border-color: #444; }
-            button:hover { background-color: #3a3a3a; }
-            .modal-content { background-color: #1a1a1a; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
-            p[style] { color: #aaa !important; }
-        }
     </style>
 </head>
 <body>
     <div class="header-container">
-        <h1>Duplex PDF</h1>
-        <button id="openSettingsBtn">⚙️ Calibration</button>
+        <h1>DuplexMe!</h1>
+        <button id="openSettingsBtn">Calibration</button>
     </div>
-    <p style="margin-bottom: 2rem; color: #555;">Convert your PDFs into Side 1 and Side 2 files for manual duplex printing.</p>
+    <p class="muted">Convert your PDFs into Side 1 and Side 2 files for manual duplex printing.</p>
     
     <!-- Modal -->
     <div id="settingsModal" class="modal-overlay">
         <div class="modal-content">
             <h2 style="margin-top: 0;">Printer Calibration</h2>
-            <p style="font-size: 0.9rem; color: #666;">Settings auto-save to local storage.</p>
+            <p class="muted" style="margin-bottom: 1.5rem; font-size: 0.9rem;">Settings auto-save to local storage.</p>
             
             <div style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
                 <strong>1. Output Tray Stacking</strong><br>
@@ -94,6 +111,41 @@
         </div>
     </div>
 
+    <!-- OOBE Modal -->
+    <div id="oobeModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 style="margin-top: 0;">Welcome to DuplexMe!</h2>
+            <p>Manual duplex printing can be a nightmare of upside-down pages and backwards books. <strong>DuplexMe!</strong> fixes this by perfectly splitting your PDFs into Side 1 and Side 2.</p>
+            <p class="muted" style="margin-bottom: 1.5rem; font-size: 0.9rem;">Before we start, let's calibrate for your specific printer so you never have to guess again.</p>
+            
+            <div style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
+                <strong>1. Output Tray Stacking</strong><br>
+                <label style="margin-top: 0.5rem;">
+                    <input type="radio" name="oobeTray" value="facedown" checked> 
+                    Face Down (Laser)
+                </label>
+                <label>
+                    <input type="radio" name="oobeTray" value="faceup"> 
+                    Face Up (Inkjet)
+                </label>
+            </div>
+            
+            <div style="margin-bottom: 2rem;">
+                <strong>2. Flip Orientation</strong><br>
+                <label style="margin-top: 0.5rem;">
+                    <input type="radio" name="oobeFlip" value="long" checked> 
+                    Long Edge (Book)
+                </label>
+                <label>
+                    <input type="radio" name="oobeFlip" value="short"> 
+                    Short Edge (Calendar)
+                </label>
+            </div>
+            
+            <button id="finishOobeBtn" style="width: 100%;">Save & Start</button>
+        </div>
+    </div>
+
     <div id="dropzone" class="box">
         <strong>Drag & Drop your PDF here</strong>
         <p>or click to select file</p>
@@ -110,7 +162,7 @@
             <p>Step 1: Print this file normally.</p>
             <div class="actions">
                 <button id="downloadSide1">Download Side 1</button>
-                <button id="printSide1">Print Side 1</button>
+                <button id="printSide1" class="accent-btn">Print Side 1</button>
             </div>
         </div>
 
@@ -119,7 +171,7 @@
             <p>Step 2: Take the printed stack from Side 1, put it back into the paper tray, and print this file.</p>
             <div class="actions">
                 <button id="downloadSide2">Download Side 2</button>
-                <button id="printSide2">Print Side 2</button>
+                <button id="printSide2" class="accent-btn">Print Side 2</button>
             </div>
         </div>
     </div>
