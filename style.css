@@ -1,0 +1,432 @@
+:root {
+    --accent-color: #007AFF;
+    --bg-gradient: linear-gradient(135deg, #e2e2e2 0%, #ffffff 100%);
+    --glass-bg: #ffffff;
+    --text-color: #1d1d1f;
+    --text-secondary: #86868b;
+    --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    --border-color: rgba(0, 0, 0, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-gradient: radial-gradient(circle at 50% 50%, #1c1c1e 0%, #000000 100%);
+        --glass-bg: #1c1c1e;
+        --text-color: #f5f5f7;
+        --text-secondary: #a1a1aa;
+        --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        --border-color: rgba(255, 255, 255, 0.1);
+    }
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg-gradient);
+    color: var(--text-color);
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Wizard Container (Transparent, serves as a window) */
+.wizard-container {
+    width: 100%;
+    max-width: 680px;
+    height: 520px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 32px;
+}
+
+/* Step Content */
+.wizard-steps {
+    flex: 1;
+    position: relative;
+}
+
+.step {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 3rem 3rem 0 3rem;
+    /* Bottom padding moved to footer */
+    display: none;
+    /* Hide all steps by default */
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: var(--glass-bg);
+    pointer-events: none;
+    z-index: 1;
+    border: 1px solid var(--border-color);
+    border-radius: 32px;
+    box-shadow: var(--card-shadow);
+}
+
+.step.active,
+.step.past,
+.step.next-ready {
+    display: flex;
+    /* Only show steps involved in navigation */
+}
+
+.step.active {
+    transform: translateX(0);
+    pointer-events: auto;
+    z-index: 2;
+    box-shadow: -15px 0 30px rgba(0, 0, 0, 0.15);
+}
+
+.step.past {
+    transform: translateX(-50%);
+    z-index: 0;
+}
+
+.step.next-ready {
+    transform: translateX(100%);
+    z-index: 3;
+}
+
+/* Forward Animations */
+.nav-forward .step.active {
+    animation: slideInRight 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.nav-forward .step.past {
+    animation: slideOutLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Backward Animations */
+.nav-backward .step.active {
+    animation: slideInLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.nav-backward .step.next-ready {
+    animation: slideOutRight 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        visibility: visible;
+    }
+
+    to {
+        transform: translateX(0);
+        visibility: visible;
+    }
+}
+
+@keyframes slideOutLeft {
+    0% {
+        transform: translateX(0);
+        visibility: visible;
+    }
+
+    99% {
+        visibility: visible;
+    }
+
+    100% {
+        transform: translateX(-50%);
+        visibility: hidden;
+        display: none;
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-50%);
+        visibility: visible;
+    }
+
+    to {
+        transform: translateX(0);
+        visibility: visible;
+    }
+}
+
+@keyframes slideOutRight {
+    0% {
+        transform: translateX(0);
+        visibility: visible;
+    }
+
+    99% {
+        visibility: visible;
+    }
+
+    100% {
+        transform: translateX(100%);
+        visibility: hidden;
+        display: none;
+    }
+}
+
+/* Typography */
+h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+    letter-spacing: -0.02em;
+}
+
+p {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    max-width: 480px;
+    line-height: 1.4;
+}
+
+/* Drag & Drop Zone */
+.dropzone {
+    margin-top: 2rem;
+    width: 100%;
+    height: 180px;
+    border: 2px dashed var(--border-color);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.dropzone:hover,
+.dropzone.dragover {
+    background: rgba(0, 122, 255, 0.1);
+    border-color: var(--accent-color);
+}
+
+.dropzone svg {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 1rem;
+    color: var(--accent-color);
+}
+
+/* Wizard Footer - Now inside each step */
+.wizard-footer {
+    margin-top: auto;
+    width: calc(100% + 6rem);
+    margin-left: -3rem;
+    margin-right: -3rem;
+    padding: 1.5rem 2rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.02);
+    border-bottom-left-radius: 32px;
+    border-bottom-right-radius: 32px;
+}
+
+.footer-left {
+    display: flex;
+    gap: 0.8rem;
+}
+
+.btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    width: 100%;
+    max-width: 320px;
+    margin: 2rem auto 0 auto;
+}
+
+.btn-group button {
+    width: 100%;
+}
+
+button {
+    padding: 0.8rem 1.8rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+button.primary {
+    background: var(--accent-color);
+    color: white;
+}
+
+/* Updated: Print Now shouldn't be accented (primary) as per user request */
+button.print-btn {
+    background: var(--border-color);
+    color: var(--text-color);
+}
+
+button.primary:hover {
+    filter: brightness(1.1);
+}
+
+button.secondary {
+    background: var(--border-color);
+    color: var(--text-color);
+}
+
+button.ghost {
+    background: transparent;
+    color: var(--accent-color);
+}
+
+/* Liquid Glass Circle Back Button */
+.ios-back-btn {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    color: var(--text-color);
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0;
+}
+
+.ios-back-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.ios-back-btn:active {
+    transform: scale(0.95);
+}
+
+.ios-back-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Calibration Grid */
+.options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    width: 100%;
+    text-align: left;
+}
+
+.option-group {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+}
+
+.option-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0.6rem 0;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+/* Success Icon */
+.success-checkmark {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 1.5rem;
+    color: #34C759;
+}
+
+.hidden {
+    display: none !important;
+}
+
+@media (max-width: 680px) {
+    .wizard-container {
+        height: 100vh;
+        max-width: 100%;
+        border-radius: 0;
+        border: none;
+    }
+
+    .step {
+        padding: 2rem 1.5rem 0 1.5rem;
+        text-align: left;
+        align-items: flex-start;
+        border-radius: 0;
+        border: none;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    p {
+        max-width: 100%;
+    }
+
+    .btn-group {
+        margin-top: auto !important;
+        margin-bottom: 1rem;
+    }
+
+    .wizard-footer {
+        background: none;
+        border: none;
+        flex-direction: column-reverse;
+        gap: 0.5rem;
+        padding: 1rem 1.5rem 2rem 1.5rem;
+        width: calc(100% + 3rem);
+        margin-left: -1.5rem;
+        margin-right: -1.5rem;
+        border-radius: 0;
+    }
+
+    #footer-left,
+    #nextBtn {
+        width: 100%;
+    }
+
+    #footer-left {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .wizard-footer button {
+        width: 100%;
+    }
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+}

@@ -17,6 +17,8 @@ let side1BlobUrl = null;
 let side2BlobUrl = null;
 let direction = 'forward';
 
+let isFirstLoad = true;
+
 // Initialization
 function init() {
     loadSettings();
@@ -26,10 +28,13 @@ function init() {
 // 1. Navigation Logic
 function updateWizardUI() {
     // Set direction class on container
-    wizardStepsContainer.classList.remove('nav-forward', 'nav-backward');
-    // Force reflow to restart animations
-    void wizardStepsContainer.offsetWidth;
-    wizardStepsContainer.classList.add('nav-' + direction);
+    if (!isFirstLoad) {
+        wizardStepsContainer.classList.remove('nav-forward', 'nav-backward');
+        // Force reflow to restart animations
+        void wizardStepsContainer.offsetWidth;
+        wizardStepsContainer.classList.add('nav-' + direction);
+    }
+    isFirstLoad = false;
 
     steps.forEach((step, idx) => {
         const stepNum = idx + 1;
@@ -43,22 +48,10 @@ function updateWizardUI() {
         }
     });
 
-    // Update Buttons in all steps
-    nextBtns.forEach(btn => {
-        if (currentStep === 1) {
-            btn.innerText = "Continue";
-            btn.disabled = !pdfFile;
-        } else if (currentStep === 2) {
-            btn.innerText = "Done";
-            btn.disabled = false;
-        } else if (currentStep === totalSteps) {
-            btn.innerText = "Start Over";
-            btn.disabled = false;
-        } else {
-            btn.innerText = "Continue";
-            btn.disabled = false;
-        }
-    });
+    // Update Buttons state
+    if (currentStep === 1) {
+        nextBtns[0].disabled = !pdfFile;
+    }
 }
 
 calibrateBtns.forEach(btn => {
