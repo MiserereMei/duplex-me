@@ -68,7 +68,6 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         /* Step Content */
@@ -91,7 +90,6 @@
             opacity: 0;
             transform: translateX(40px);
             pointer-events: none;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .step.active {
@@ -164,6 +162,7 @@
             gap: 0.8rem;
             width: 100%;
             max-width: 320px;
+            margin: 2rem auto 0 auto;
         }
 
         .btn-group button {
@@ -242,6 +241,34 @@
             display: none !important;
         }
 
+        @media (max-width: 680px) {
+            .wizard-container {
+                height: 100vh;
+                max-width: 100%;
+                border-radius: 0;
+                border: none;
+            }
+
+            .step {
+                padding: 2rem 1.5rem;
+                text-align: left;
+                align-items: flex-start;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            p {
+                max-width: 100%;
+            }
+
+            .btn-group {
+                margin-top: auto !important;
+                margin-bottom: 1rem;
+            }
+        }
+
         @media print {
             body * { visibility: hidden; }
         }
@@ -303,19 +330,8 @@
                 </div>
             </div>
 
-            <!-- Step 4: The Flip Instructions -->
+            <!-- Step 4: Side 2 -->
             <div id="step4" class="step">
-                <h1>Ready for Side 2?</h1>
-                <p id="flipInstructionText">Take the printed stack from the tray and place it back into the paper feeder.</p>
-                
-                <div style="margin-top: 2rem; background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 20px; border: 1px solid var(--border-color); width: 100%;">
-                    <strong style="color: var(--accent-color);">Pro Tip:</strong>
-                    <p style="font-size: 0.9rem; margin-top: 0.5rem;" id="tipText">Don't rotate or shuffle the pages. Just move the stack as is.</p>
-                </div>
-            </div>
-
-            <!-- Step 5: Side 2 -->
-            <div id="step5" class="step">
                 <h1 id="side2Title">Side 2 (Even Pages)</h1>
                 <p id="side2Text">Final Step: Print these pages on the back of your first stack.</p>
                 
@@ -325,8 +341,8 @@
                 </div>
             </div>
 
-            <!-- Step 6: Success -->
-            <div id="step6" class="step">
+            <!-- Step 5: Success -->
+            <div id="step5" class="step">
                 <svg class="success-checkmark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -340,14 +356,6 @@
             <div id="footer-left">
                 <button id="backBtn" class="ghost" style="visibility: hidden;">Back</button>
                 <button id="calibrateBtn" class="ghost">Calibrate</button>
-            </div>
-            <div id="dots" style="display: flex; gap: 6px;">
-                <div style="width: 6px; height: 6px; border-radius: 50%; background: var(--accent-color);"></div>
-                <div style="width: 6px; height: 6px; border-radius: 50%; background: var(--border-color);"></div>
-                <div style="width: 6px; height: 6px; border-radius: 50%; background: var(--border-color);"></div>
-                <div style="width: 6px; height: 6px; border-radius: 50%; background: var(--border-color);"></div>
-                <div style="width: 6px; height: 6px; border-radius: 50%; background: var(--border-color);"></div>
-                <div style="width: 6px; height: 6px; border-radius: 50%; background: var(--border-color);"></div>
             </div>
             <button id="nextBtn" class="primary" disabled>Continue</button>
         </div>

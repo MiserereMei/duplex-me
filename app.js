@@ -5,7 +5,6 @@ const wizard = document.querySelector('.wizard-container');
 const steps = document.querySelectorAll('.step');
 const nextBtn = document.getElementById('nextBtn');
 const backBtn = document.getElementById('backBtn');
-const dots = document.querySelectorAll('#dots div');
 const fileInput = document.getElementById('fileInput');
 const dropzone = document.getElementById('dropzone');
 
@@ -33,11 +32,6 @@ function updateWizardUI() {
         } else if (stepNum < currentStep) {
             step.classList.add('past');
         }
-    });
-
-    // Update Dots
-    dots.forEach((dot, idx) => {
-        dot.style.background = (idx + 1 <= currentStep) ? 'var(--accent-color)' : 'var(--border-color)';
     });
 
     // Update Buttons Visibility
