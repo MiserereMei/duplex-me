@@ -228,23 +228,56 @@ function setupButtons(sideName, blobUrl, filename) {
     };
 
     printBtn.onclick = () => {
-        // We create an invisible iframe to print the PDF without leaving the page
+        // Create an iframe for printing
         const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
+        
+        // Safari and others: Do NOT use display: none. 
+        // We use absolute positioning to hide it from the user but keep it "visible" for the browser.
+        iframe.style.position = 'fixed';
+        iframe.style.right = '0';
+        iframe.style.bottom = '0';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
+        iframe.style.visibility = 'hidden';
+        iframe.style.border = 'none';
         iframe.src = blobUrl;
         document.body.appendChild(iframe);
         
         iframe.onload = () => {
-            // Trigger the print dialog for the iframe
-            iframe.contentWindow.print();
-            
-            // Clean up the iframe after a generous delay (e.g., 2 minutes)
-            // to ensure the user has enough time to click Print in the system dialog.
+            // Give the browser time to initialize the PDF viewer
+            // Safari often needs a bit more time than Chrome
+            const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+            const delay = isSafari ? 2000 : 500;
+
             setTimeout(() => {
-                if (document.body.contains(iframe)) {
-                    document.body.removeChild(iframe);
+                try {
+                    iframe.contentWindow.focus();
+                    
+                    // Specific check for Safari to use a more robust print trigger if needed
+                    if (isSafari) {
+                        // Some Safari versions prefer execCommand for iframes
+                        const success = iframe.contentWindow.document.execCommand('print', false, null);
+                        if (!success) {
+                            iframe.contentWindow.print();
+                        }
+                    } else {
+                        iframe.contentWindow.print();
+                    }
+                } catch (e) {
+                    console.error('Print failed, falling back to new window:', e);
+                    window.open(blobUrl, '_blank');
                 }
-            }, 120000); 
+                
+                // Hide immediately to prevent zoom buttons from lingering
+                iframe.style.display = 'none';
+                
+                // Clean up the iframe after a delay
+                setTimeout(() => {
+                    if (document.body.contains(iframe)) {
+                        document.body.removeChild(iframe);
+                    }
+                }, 10000); 
+            }, delay);
         };
     };
 }
