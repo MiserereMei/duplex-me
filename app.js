@@ -3,18 +3,19 @@ import { PDFDocument, degrees } from 'pdf-lib';
 // DOM Elements
 const wizard = document.querySelector('.wizard-container');
 const steps = document.querySelectorAll('.step');
-const nextBtn = document.getElementById('nextBtn');
-const iosBackBtn = document.getElementById('iosBackBtn');
+const wizardStepsContainer = document.querySelector('.wizard-steps');
+const nextBtns = document.querySelectorAll('.next-btn');
+const iosBackBtns = document.querySelectorAll('.ios-back-btn');
 const fileInput = document.getElementById('fileInput');
 const dropzone = document.getElementById('dropzone');
-
-const calibrateBtn = document.getElementById('calibrateBtn');
+const calibrateBtns = document.querySelectorAll('.calibrate-btn');
 
 let currentStep = 1;
 let totalSteps = steps.length;
 let pdfFile = null;
 let side1BlobUrl = null;
 let side2BlobUrl = null;
+let direction = 'forward';
 
 // Initialization
 function init() {
@@ -24,64 +25,78 @@ function init() {
 
 // 1. Navigation Logic
 function updateWizardUI() {
+    // Set direction class on container
+    wizardStepsContainer.classList.remove('nav-forward', 'nav-backward');
+    // Force reflow to restart animations
+    void wizardStepsContainer.offsetWidth;
+    wizardStepsContainer.classList.add('nav-' + direction);
+
     steps.forEach((step, idx) => {
         const stepNum = idx + 1;
         step.classList.remove('active', 'past', 'next-ready');
         if (stepNum === currentStep) {
             step.classList.add('active');
-        } else if (stepNum < currentStep) {
+        } else if (stepNum === currentStep - 1) {
             step.classList.add('past');
-        } else {
+        } else if (stepNum === currentStep + 1) {
             step.classList.add('next-ready');
         }
     });
 
-    // Update Buttons Visibility
-    iosBackBtn.style.display = (currentStep > 1 && currentStep < totalSteps) ? 'flex' : 'none';
-    calibrateBtn.style.display = (currentStep === 1) ? 'block' : 'none';
-
-    if (currentStep === 1) {
-        nextBtn.innerText = "Continue";
-        nextBtn.disabled = !pdfFile;
-    } else if (currentStep === 2) {
-        nextBtn.innerText = "Done";
-        nextBtn.disabled = false;
-    } else if (currentStep === totalSteps) {
-        nextBtn.innerText = "Start Over";
-        nextBtn.disabled = false;
-    } else {
-        nextBtn.innerText = "Continue";
-        nextBtn.disabled = false;
-    }
+    // Update Buttons in all steps
+    nextBtns.forEach(btn => {
+        if (currentStep === 1) {
+            btn.innerText = "Continue";
+            btn.disabled = !pdfFile;
+        } else if (currentStep === 2) {
+            btn.innerText = "Done";
+            btn.disabled = false;
+        } else if (currentStep === totalSteps) {
+            btn.innerText = "Start Over";
+            btn.disabled = false;
+        } else {
+            btn.innerText = "Continue";
+            btn.disabled = false;
+        }
+    });
 }
 
-calibrateBtn.addEventListener('click', () => {
-    currentStep = 2;
-    updateWizardUI();
+calibrateBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        direction = 'forward';
+        currentStep = 2;
+        updateWizardUI();
+    });
 });
 
-iosBackBtn.addEventListener('click', () => {
-    if (currentStep === 2) {
-        currentStep = 1;
-    } else if (currentStep > 1) {
-        currentStep--;
-    }
-    updateWizardUI();
+iosBackBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        direction = 'backward';
+        if (currentStep === 2) {
+            currentStep = 1;
+        } else if (currentStep > 1) {
+            currentStep--;
+        }
+        updateWizardUI();
+    });
 });
 
-nextBtn.addEventListener('click', () => {
-    if (currentStep === 1 && pdfFile) {
-        processFile(pdfFile);
-    } else if (currentStep === 2) {
-        saveSettings();
-        currentStep = 1;
-        updateWizardUI();
-    } else if (currentStep === totalSteps) {
-        resetWizard();
-    } else {
-        currentStep++;
-        updateWizardUI();
-    }
+nextBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        direction = 'forward';
+        if (currentStep === 1 && pdfFile) {
+            processFile(pdfFile);
+        } else if (currentStep === 2) {
+            saveSettings();
+            currentStep = 1;
+            updateWizardUI();
+        } else if (currentStep === totalSteps) {
+            resetWizard();
+        } else {
+            currentStep++;
+            updateWizardUI();
+        }
+    });
 });
 
 function resetWizard() {
@@ -133,10 +148,10 @@ function handleFileSelect(file) {
     }
     pdfFile = file;
     document.getElementById('welcomeTitle').innerText = `Ready: ${file.name}`;
-    nextBtn.disabled = false;
+    updateWizardUI(); // Update buttons state
     // Auto-advance after a small delay for better feel
     setTimeout(() => {
-        if (currentStep === 1) nextBtn.click();
+        if (currentStep === 1) nextBtns[0].click();
     }, 600);
 }
 

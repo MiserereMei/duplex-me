@@ -7,7 +7,7 @@
     <title>DuplexMe! - Manual Duplex PDF Tool</title>
     <meta name="description" content="A minimalist, browser-based PDF utility for perfect manual duplex printing.">
     <link rel="icon" type="image/svg+xml" href="/logo.circle.svg" />
-    
+
     <meta name="theme-color" content="#F4F4F5" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -17,7 +17,7 @@
         :root {
             --accent-color: #007AFF;
             --bg-gradient: linear-gradient(135deg, #e2e2e2 0%, #ffffff 100%);
-            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-bg: #ffffff;
             --text-color: #1d1d1f;
             --text-secondary: #86868b;
             --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
@@ -27,7 +27,7 @@
         @media (prefers-color-scheme: dark) {
             :root {
                 --bg-gradient: radial-gradient(circle at 50% 50%, #1c1c1e 0%, #000000 100%);
-                --glass-bg: rgba(28, 28, 30, 0.75);
+                --glass-bg: #1c1c1e;
                 --text-color: #f5f5f7;
                 --text-secondary: #a1a1aa;
                 --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
@@ -53,21 +53,16 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Wizard Container */
+        /* Wizard Container (Transparent, serves as a window) */
         .wizard-container {
             width: 100%;
             max-width: 680px;
             height: 520px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(25px) saturate(180%);
-            -webkit-backdrop-filter: blur(25px) saturate(180%);
-            border-radius: 32px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--card-shadow);
             position: relative;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            border-radius: 32px;
         }
 
         /* Step Content */
@@ -82,38 +77,115 @@
             left: 0;
             width: 100%;
             height: 100%;
-            padding: 3rem;
-            display: flex;
+            padding: 3rem 3rem 0 3rem;
+            /* Bottom padding moved to footer */
+            display: none; /* Hide all steps by default */
             flex-direction: column;
             align-items: center;
             text-align: center;
-            background: var(--glass-bg); /* Opaque background for layering */
-            backdrop-filter: blur(25px) saturate(180%);
-            -webkit-backdrop-filter: blur(25px) saturate(180%);
-            opacity: 0;
+            background: var(--glass-bg);
             pointer-events: none;
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1;
+            border: 1px solid var(--border-color);
+            border-radius: 32px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .step.active, .step.past, .step.next-ready {
+            display: flex; /* Only show steps involved in navigation */
         }
 
         .step.active {
-            opacity: 1;
             transform: translateX(0);
             pointer-events: auto;
             z-index: 2;
-            box-shadow: -15px 0 30px rgba(0, 0, 0, 0.15); /* Shadow on the left side */
+            box-shadow: -15px 0 30px rgba(0, 0, 0, 0.15);
         }
 
-        /* Forward navigation: old page goes to -50% */
         .step.past {
-            opacity: 0;
             transform: translateX(-50%);
+            z-index: 0;
         }
 
-        /* Forward navigation: new page comes from 100% */
         .step.next-ready {
-            opacity: 0;
             transform: translateX(100%);
+            z-index: 3;
+        }
+
+        /* Forward Animations */
+        .nav-forward .step.active {
+            animation: slideInRight 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .nav-forward .step.past {
+            animation: slideOutLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        /* Backward Animations */
+        .nav-backward .step.active {
+            animation: slideInLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .nav-backward .step.next-ready {
+            animation: slideOutRight 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                visibility: visible;
+            }
+
+            to {
+                transform: translateX(0);
+                visibility: visible;
+            }
+        }
+
+        @keyframes slideOutLeft {
+            0% {
+                transform: translateX(0);
+                visibility: visible;
+            }
+
+            99% {
+                visibility: visible;
+            }
+
+            100% {
+                transform: translateX(-50%);
+                visibility: hidden;
+                display: none;
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                transform: translateX(-50%);
+                visibility: visible;
+            }
+
+            to {
+                transform: translateX(0);
+                visibility: visible;
+            }
+        }
+
+        @keyframes slideOutRight {
+            0% {
+                transform: translateX(0);
+                visibility: visible;
+            }
+
+            99% {
+                visibility: visible;
+            }
+
+            100% {
+                transform: translateX(100%);
+                visibility: hidden;
+                display: none;
+            }
         }
 
         /* Typography */
@@ -147,7 +219,8 @@
             background: rgba(255, 255, 255, 0.05);
         }
 
-        .dropzone:hover, .dropzone.dragover {
+        .dropzone:hover,
+        .dropzone.dragover {
             background: rgba(0, 122, 255, 0.1);
             border-color: var(--accent-color);
         }
@@ -159,14 +232,25 @@
             color: var(--accent-color);
         }
 
-        /* Controls */
+        /* Wizard Footer - Now inside each step */
         .wizard-footer {
+            margin-top: auto;
+            width: calc(100% + 6rem);
+            margin-left: -3rem;
+            margin-right: -3rem;
             padding: 1.5rem 2rem;
             border-top: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: rgba(255, 255, 255, 0.02);
+            border-bottom-left-radius: 32px;
+            border-bottom-right-radius: 32px;
+        }
+
+        .footer-left {
+            display: flex;
+            gap: 0.8rem;
         }
 
         .btn-group {
@@ -232,8 +316,6 @@
             color: var(--text-color);
             cursor: pointer;
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px) saturate(180%);
-            -webkit-backdrop-filter: blur(15px) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.2);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -307,9 +389,11 @@
             }
 
             .step {
-                padding: 2rem 1.5rem;
+                padding: 2rem 1.5rem 0 1.5rem;
                 text-align: left;
                 align-items: flex-start;
+                border-radius: 0;
+                border: none;
             }
 
             h1 {
@@ -331,9 +415,14 @@
                 flex-direction: column-reverse;
                 gap: 0.5rem;
                 padding: 1rem 1.5rem 2rem 1.5rem;
+                width: calc(100% + 3rem);
+                margin-left: -1.5rem;
+                margin-right: -1.5rem;
+                border-radius: 0;
             }
 
-            #footer-left, #nextBtn {
+            #footer-left,
+            #nextBtn {
                 width: 100%;
             }
 
@@ -349,20 +438,15 @@
         }
 
         @media print {
-            body * { visibility: hidden; }
+            body * {
+                visibility: hidden;
+            }
         }
     </style>
 </head>
 
 <body>
     <div class="wizard-container">
-        <!-- New: iOS Style Back Button -->
-        <button id="iosBackBtn" class="ios-back-btn" style="display: none;">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-        </button>
-
         <div class="wizard-steps">
             <!-- Step 1: Welcome & Upload -->
             <div id="step1" class="step active">
@@ -370,22 +454,39 @@
                 <p>Convert any PDF into perfectly ordered Side 1 and Side 2 files for manual duplex printing.</p>
                 <div id="dropzone" class="dropzone">
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                     </svg>
                     <strong>Choose a PDF file</strong>
-                    <span style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.4rem;">or drag and drop it here</span>
+                    <span style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.4rem;">or drag and drop
+                        it here</span>
                     <input type="file" id="fileInput" accept="application/pdf" class="hidden">
+                </div>
+
+                <div class="wizard-footer">
+                    <div class="footer-left">
+                        <button class="calibrate-btn ghost">Calibrate</button>
+                    </div>
+                    <button class="next-btn primary" disabled>Continue</button>
                 </div>
             </div>
 
             <!-- Step 2: Calibration -->
             <div id="step2" class="step">
+                <button class="ios-back-btn">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+
                 <h1>Printer Calibration</h1>
                 <p>Let's make sure your pages come out in the right order and orientation.</p>
-                
+
                 <div class="options-grid">
                     <div class="option-group">
-                        <strong style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-secondary);">Output Tray</strong>
+                        <strong
+                            style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-secondary);">Output
+                            Tray</strong>
                         <label>
                             <input type="radio" name="tray" value="facedown" checked> First Page First (Face Down)
                         </label>
@@ -394,7 +495,8 @@
                         </label>
                     </div>
                     <div class="option-group">
-                        <strong style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-secondary);">Flip Edge</strong>
+                        <strong style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-secondary);">Flip
+                            Edge</strong>
                         <label>
                             <input type="radio" name="flip" value="long" checked> Long Edge (Book)
                         </label>
@@ -403,47 +505,73 @@
                         </label>
                     </div>
                 </div>
+
+                <div class="wizard-footer">
+                    <div class="footer-left"></div>
+                    <button class="next-btn primary">Done</button>
+                </div>
             </div>
 
             <!-- Step 3: Side 1 -->
             <div id="step3" class="step">
+                <button class="ios-back-btn">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+
                 <h1 id="side1Title">Side 1 (Odd Pages)</h1>
                 <p id="side1Text">Step 1: Print this file normally. Keep the printed pages in the output tray.</p>
-                
-                <div class="btn-group" style="margin-top: 2rem;">
+
+                <div class="btn-group">
                     <button id="printSide1" class="print-btn">Print Now</button>
                     <button id="downloadSide1" class="secondary">Download</button>
+                </div>
+
+                <div class="wizard-footer">
+                    <div class="footer-left"></div>
+                    <button class="next-btn primary">Continue</button>
                 </div>
             </div>
 
             <!-- Step 4: Side 2 -->
             <div id="step4" class="step">
+                <button class="ios-back-btn">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+
                 <h1 id="side2Title">Side 2 (Even Pages)</h1>
                 <p id="side2Text">Final Step: Print these pages on the back of your first stack.</p>
-                
-                <div class="btn-group" style="margin-top: 2rem;">
+
+                <div class="btn-group">
                     <button id="printSide2" class="print-btn">Print Now</button>
                     <button id="downloadSide2" class="secondary">Download</button>
+                </div>
+
+                <div class="wizard-footer">
+                    <div class="footer-left"></div>
+                    <button class="next-btn primary">Continue</button>
                 </div>
             </div>
 
             <!-- Step 5: Success -->
             <div id="step5" class="step">
                 <svg class="success-checkmark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <h1>All Done!</h1>
                 <p>Your manual duplex document has been successfully processed.</p>
-            </div>
-        </div>
 
-        <!-- Wizard Footer -->
-        <div class="wizard-footer">
-            <div id="footer-left">
-                <button id="calibrateBtn" class="ghost">Calibrate</button>
+                <div class="wizard-footer">
+                    <div class="footer-left"></div>
+                    <button class="next-btn primary">Start Over</button>
+                </div>
             </div>
-            <button id="nextBtn" class="primary" disabled>Continue</button>
         </div>
+    </div>
     </div>
 
     <script type="module" src="./app.js"></script>
