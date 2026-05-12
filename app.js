@@ -76,18 +76,21 @@ iosBackBtns.forEach(btn => {
 
 nextBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-        direction = 'forward';
-        if (currentStep === 1 && pdfFile) {
-            processFile(pdfFile);
-        } else if (currentStep === 2) {
+        if (currentStep === 2) {
+            direction = 'backward';
             saveSettings();
             currentStep = 1;
             updateWizardUI();
-        } else if (currentStep === totalSteps) {
-            resetWizard();
         } else {
-            currentStep++;
-            updateWizardUI();
+            direction = 'forward';
+            if (currentStep === 1 && pdfFile) {
+                processFile(pdfFile);
+            } else if (currentStep === totalSteps) {
+                resetWizard();
+            } else {
+                currentStep++;
+                updateWizardUI();
+            }
         }
     });
 });

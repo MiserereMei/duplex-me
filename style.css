@@ -73,7 +73,6 @@ body {
     z-index: 1;
     border: 1px solid var(--border-color);
     border-radius: 32px;
-    box-shadow: var(--card-shadow);
 }
 
 .step.active,
@@ -119,12 +118,12 @@ body {
 }
 
 @keyframes slideInRight {
-    from {
+    0% {
         transform: translateX(100%);
         visibility: visible;
     }
 
-    to {
+    100% {
         transform: translateX(0);
         visibility: visible;
     }
@@ -134,10 +133,12 @@ body {
     0% {
         transform: translateX(0);
         visibility: visible;
+        border-radius: 0px;
     }
 
-    99% {
+    99.99% {
         visibility: visible;
+        border-radius: 0px;
     }
 
     100% {
@@ -148,12 +149,17 @@ body {
 }
 
 @keyframes slideInLeft {
-    from {
+    0% {
         transform: translateX(-50%);
         visibility: visible;
+        border-radius: 0px;
     }
 
-    to {
+    99.99% {
+        border-radius: 0px;
+    }
+
+    100% {
         transform: translateX(0);
         visibility: visible;
     }
