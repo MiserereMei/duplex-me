@@ -6,6 +6,14 @@
     --text-secondary: #86868b;
     --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
     --border-color: rgba(0, 0, 0, 0.1);
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-drag: none;
+    -webkit-user-drag: none;
+    -moz-user-drag: none;
+    -ms-user-drag: none;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -209,7 +217,6 @@ p {
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
-    cursor: pointer;
     background: rgba(255, 255, 255, 0.05);
 }
 
@@ -266,8 +273,12 @@ button {
     font-weight: 600;
     border-radius: 14px;
     border: none;
-    cursor: pointer;
     transition: all 0.2s ease;
+}
+
+button:active {
+    transition: .1s;
+    opacity: .5;
 }
 
 button.primary {
@@ -308,7 +319,6 @@ button.ghost {
     height: 44px;
     border-radius: 50%;
     color: var(--text-color);
-    cursor: pointer;
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -316,14 +326,9 @@ button.ghost {
     padding: 0;
 }
 
-.ios-back-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-}
-
 .ios-back-btn:active {
     transform: scale(0.95);
+    opacity: .5;
 }
 
 .ios-back-btn svg {
@@ -358,7 +363,6 @@ button:disabled {
     align-items: center;
     gap: 0.6rem;
     margin: 0.6rem 0;
-    cursor: pointer;
     font-size: 0.9rem;
 }
 
@@ -392,6 +396,14 @@ button:disabled {
 
     h1 {
         font-size: 1.8rem;
+    }
+
+    .step:not(:has(.ios-back-btn)) h1 {
+        margin-top: 20px;
+    }
+
+    .step:has(.ios-back-btn) h1 {
+        margin-top: 60px;
     }
 
     p {
