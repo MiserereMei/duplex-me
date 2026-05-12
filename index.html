@@ -87,20 +87,33 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
+            background: var(--glass-bg); /* Opaque background for layering */
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
             opacity: 0;
-            transform: translateX(40px);
             pointer-events: none;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
         }
 
         .step.active {
             opacity: 1;
             transform: translateX(0);
             pointer-events: auto;
+            z-index: 2;
+            box-shadow: -15px 0 30px rgba(0, 0, 0, 0.15); /* Shadow on the left side */
         }
 
+        /* Forward navigation: old page goes to -50% */
         .step.past {
             opacity: 0;
-            transform: translateX(-40px);
+            transform: translateX(-50%);
+        }
+
+        /* Forward navigation: new page comes from 100% */
+        .step.next-ready {
+            opacity: 0;
+            transform: translateX(100%);
         }
 
         /* Typography */
@@ -184,6 +197,12 @@
             color: white;
         }
 
+        /* Updated: Print Now shouldn't be accented (primary) as per user request */
+        button.print-btn {
+            background: var(--border-color);
+            color: var(--text-color);
+        }
+
         button.primary:hover {
             filter: brightness(1.1);
         }
@@ -196,6 +215,44 @@
         button.ghost {
             background: transparent;
             color: var(--accent-color);
+        }
+
+        /* Liquid Glass Circle Back Button */
+        .ios-back-btn {
+            position: absolute;
+            top: 1.5rem;
+            left: 1.5rem;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            color: var(--text-color);
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px) saturate(180%);
+            -webkit-backdrop-filter: blur(15px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 0;
+        }
+
+        .ios-back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .ios-back-btn:active {
+            transform: scale(0.95);
+        }
+
+        .ios-back-btn svg {
+            width: 24px;
+            height: 24px;
         }
 
         button:disabled {
@@ -267,6 +324,28 @@
                 margin-top: auto !important;
                 margin-bottom: 1rem;
             }
+
+            .wizard-footer {
+                background: none;
+                border: none;
+                flex-direction: column-reverse;
+                gap: 0.5rem;
+                padding: 1rem 1.5rem 2rem 1.5rem;
+            }
+
+            #footer-left, #nextBtn {
+                width: 100%;
+            }
+
+            #footer-left {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .wizard-footer button {
+                width: 100%;
+            }
         }
 
         @media print {
@@ -277,6 +356,13 @@
 
 <body>
     <div class="wizard-container">
+        <!-- New: iOS Style Back Button -->
+        <button id="iosBackBtn" class="ios-back-btn" style="display: none;">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+        </button>
+
         <div class="wizard-steps">
             <!-- Step 1: Welcome & Upload -->
             <div id="step1" class="step active">
@@ -325,7 +411,7 @@
                 <p id="side1Text">Step 1: Print this file normally. Keep the printed pages in the output tray.</p>
                 
                 <div class="btn-group" style="margin-top: 2rem;">
-                    <button id="printSide1" class="primary">Print Now</button>
+                    <button id="printSide1" class="print-btn">Print Now</button>
                     <button id="downloadSide1" class="secondary">Download</button>
                 </div>
             </div>
@@ -336,7 +422,7 @@
                 <p id="side2Text">Final Step: Print these pages on the back of your first stack.</p>
                 
                 <div class="btn-group" style="margin-top: 2rem;">
-                    <button id="printSide2" class="primary">Print Now</button>
+                    <button id="printSide2" class="print-btn">Print Now</button>
                     <button id="downloadSide2" class="secondary">Download</button>
                 </div>
             </div>
@@ -354,7 +440,6 @@
         <!-- Wizard Footer -->
         <div class="wizard-footer">
             <div id="footer-left">
-                <button id="backBtn" class="ghost" style="visibility: hidden;">Back</button>
                 <button id="calibrateBtn" class="ghost">Calibrate</button>
             </div>
             <button id="nextBtn" class="primary" disabled>Continue</button>

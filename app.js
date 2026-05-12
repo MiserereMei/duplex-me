@@ -4,7 +4,7 @@ import { PDFDocument, degrees } from 'pdf-lib';
 const wizard = document.querySelector('.wizard-container');
 const steps = document.querySelectorAll('.step');
 const nextBtn = document.getElementById('nextBtn');
-const backBtn = document.getElementById('backBtn');
+const iosBackBtn = document.getElementById('iosBackBtn');
 const fileInput = document.getElementById('fileInput');
 const dropzone = document.getElementById('dropzone');
 
@@ -26,16 +26,18 @@ function init() {
 function updateWizardUI() {
     steps.forEach((step, idx) => {
         const stepNum = idx + 1;
-        step.classList.remove('active', 'past');
+        step.classList.remove('active', 'past', 'next-ready');
         if (stepNum === currentStep) {
             step.classList.add('active');
         } else if (stepNum < currentStep) {
             step.classList.add('past');
+        } else {
+            step.classList.add('next-ready');
         }
     });
 
     // Update Buttons Visibility
-    backBtn.style.display = (currentStep > 1 && currentStep < totalSteps) ? 'block' : 'none';
+    iosBackBtn.style.display = (currentStep > 1 && currentStep < totalSteps) ? 'flex' : 'none';
     calibrateBtn.style.display = (currentStep === 1) ? 'block' : 'none';
 
     if (currentStep === 1) {
@@ -58,6 +60,15 @@ calibrateBtn.addEventListener('click', () => {
     updateWizardUI();
 });
 
+iosBackBtn.addEventListener('click', () => {
+    if (currentStep === 2) {
+        currentStep = 1;
+    } else if (currentStep > 1) {
+        currentStep--;
+    }
+    updateWizardUI();
+});
+
 nextBtn.addEventListener('click', () => {
     if (currentStep === 1 && pdfFile) {
         processFile(pdfFile);
@@ -71,15 +82,6 @@ nextBtn.addEventListener('click', () => {
         currentStep++;
         updateWizardUI();
     }
-});
-
-backBtn.addEventListener('click', () => {
-    if (currentStep === 2) {
-        currentStep = 1;
-    } else if (currentStep > 1) {
-        currentStep--;
-    }
-    updateWizardUI();
 });
 
 function resetWizard() {
