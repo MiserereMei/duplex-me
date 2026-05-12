@@ -9,6 +9,8 @@ const dots = document.querySelectorAll('#dots div');
 const fileInput = document.getElementById('fileInput');
 const dropzone = document.getElementById('dropzone');
 
+const calibrateBtn = document.getElementById('calibrateBtn');
+
 let currentStep = 1;
 let totalSteps = steps.length;
 let pdfFile = null;
@@ -38,12 +40,16 @@ function updateWizardUI() {
         dot.style.background = (idx + 1 <= currentStep) ? 'var(--accent-color)' : 'var(--border-color)';
     });
 
-    // Update Buttons
-    backBtn.style.visibility = (currentStep > 1 && currentStep < totalSteps) ? 'visible' : 'hidden';
-    
+    // Update Buttons Visibility
+    backBtn.style.display = (currentStep > 1 && currentStep < totalSteps) ? 'block' : 'none';
+    calibrateBtn.style.display = (currentStep === 1) ? 'block' : 'none';
+
     if (currentStep === 1) {
         nextBtn.innerText = "Continue";
         nextBtn.disabled = !pdfFile;
+    } else if (currentStep === 2) {
+        nextBtn.innerText = "Done";
+        nextBtn.disabled = false;
     } else if (currentStep === totalSteps) {
         nextBtn.innerText = "Start Over";
         nextBtn.disabled = false;
@@ -53,9 +59,18 @@ function updateWizardUI() {
     }
 }
 
+calibrateBtn.addEventListener('click', () => {
+    currentStep = 2;
+    updateWizardUI();
+});
+
 nextBtn.addEventListener('click', () => {
     if (currentStep === 1 && pdfFile) {
         processFile(pdfFile);
+    } else if (currentStep === 2) {
+        saveSettings();
+        currentStep = 1;
+        updateWizardUI();
     } else if (currentStep === totalSteps) {
         resetWizard();
     } else {
@@ -65,10 +80,12 @@ nextBtn.addEventListener('click', () => {
 });
 
 backBtn.addEventListener('click', () => {
-    if (currentStep > 1) {
+    if (currentStep === 2) {
+        currentStep = 1;
+    } else if (currentStep > 1) {
         currentStep--;
-        updateWizardUI();
     }
+    updateWizardUI();
 });
 
 function resetWizard() {

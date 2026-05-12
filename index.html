@@ -274,10 +274,10 @@
                     <div class="option-group">
                         <strong style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-secondary);">Output Tray</strong>
                         <label>
-                            <input type="radio" name="tray" value="facedown" checked> Face Down (Laser)
+                            <input type="radio" name="tray" value="facedown" checked> First Page First (Face Down)
                         </label>
                         <label>
-                            <input type="radio" name="tray" value="faceup"> Face Up (Inkjet)
+                            <input type="radio" name="tray" value="faceup"> Last Page First (Face Up)
                         </label>
                     </div>
                     <div class="option-group">
@@ -337,7 +337,10 @@
 
         <!-- Wizard Footer -->
         <div class="wizard-footer">
-            <button id="backBtn" class="ghost" style="visibility: hidden;">Back</button>
+            <div id="footer-left">
+                <button id="backBtn" class="ghost" style="visibility: hidden;">Back</button>
+                <button id="calibrateBtn" class="ghost">Calibrate</button>
+            </div>
             <div id="dots" style="display: flex; gap: 6px;">
                 <div style="width: 6px; height: 6px; border-radius: 50%; background: var(--accent-color);"></div>
                 <div style="width: 6px; height: 6px; border-radius: 50%; background: var(--border-color);"></div>
