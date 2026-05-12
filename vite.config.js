@@ -17,8 +17,8 @@ export default defineConfig({
         name: 'DuplexMe!',
         short_name: 'DuplexMe',
         description: 'A minimalist, browser-based PDF utility for perfect manual duplex printing.',
-        theme_color: '#18181b',
-        background_color: '#18181b',
+        theme_color: '#000000',
+        background_color: '#000000',
         display: 'standalone',
         icons: [
           {
