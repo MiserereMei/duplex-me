@@ -458,7 +458,8 @@ button:disabled {
 }
 
 .anim-box {
-    display: none; /* Hide by default */
+    display: none;
+    /* Hide by default */
     position: relative;
     width: 60px;
     height: 80px;
@@ -467,10 +468,21 @@ button:disabled {
 }
 
 /* Show logic */
-.tray-visual-container.show-facedown #facedownBox { display: block; }
-.tray-visual-container.show-faceup #faceupBox { display: block; }
-.flip-visual-container.show-long #longBox { display: block; }
-.flip-visual-container.show-short #shortBox { display: block; }
+.tray-visual-container.show-facedown #facedownBox {
+    display: block;
+}
+
+.tray-visual-container.show-faceup #faceupBox {
+    display: block;
+}
+
+.flip-visual-container.show-long #longBox {
+    display: block;
+}
+
+.flip-visual-container.show-short #shortBox {
+    display: block;
+}
 
 .paper {
     position: absolute;
@@ -503,29 +515,91 @@ button:disabled {
     animation: paperDrop3 4s infinite both;
 }
 
-.p1 { --z: 0px; z-index: 1; }
-.p2 { --z: 15px; z-index: 2; }
-.p3 { --z: 30px; z-index: 3; }
+.p1 {
+    --z: -10px;
+    z-index: 1;
+}
+
+.p2 {
+    --z: 0px;
+    z-index: 2;
+}
+
+.p3 {
+    --z: 10px;
+    z-index: 3;
+}
 
 @keyframes paperDrop1 {
-    0%, 5% { transform: translate3d(0, 0, 200px); opacity: 0; }
-    10% { opacity: 1; }
-    25%, 85% { transform: translate3d(0, 0, var(--z)); opacity: 1; }
-    95%, 100% { opacity: 0; }
+
+    0%,
+    5% {
+        transform: translate3d(0, 0, 200px);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    25%,
+    85% {
+        transform: translate3d(0, 0, var(--z));
+        opacity: 1;
+    }
+
+    95%,
+    100% {
+        opacity: 0;
+    }
 }
 
 @keyframes paperDrop2 {
-    0%, 20% { transform: translate3d(0, 0, 200px); opacity: 0; }
-    25% { opacity: 1; }
-    40%, 85% { transform: translate3d(0, 0, var(--z)); opacity: 1; }
-    95%, 100% { opacity: 0; }
+
+    0%,
+    20% {
+        transform: translate3d(0, 0, 200px);
+        opacity: 0;
+    }
+
+    25% {
+        opacity: 1;
+    }
+
+    40%,
+    85% {
+        transform: translate3d(0, 0, var(--z));
+        opacity: 1;
+    }
+
+    95%,
+    100% {
+        opacity: 0;
+    }
 }
 
 @keyframes paperDrop3 {
-    0%, 35% { transform: translate3d(0, 0, 200px); opacity: 0; }
-    40% { opacity: 1; }
-    55%, 85% { transform: translate3d(0, 0, var(--z)); opacity: 1; }
-    95%, 100% { opacity: 0; }
+
+    0%,
+    35% {
+        transform: translate3d(0, 0, 200px);
+        opacity: 0;
+    }
+
+    40% {
+        opacity: 1;
+    }
+
+    55%,
+    85% {
+        transform: translate3d(0, 0, var(--z));
+        opacity: 1;
+    }
+
+    95%,
+    100% {
+        opacity: 0;
+    }
 }
 
 /* Flip Animation */
