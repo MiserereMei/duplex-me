@@ -20,6 +20,7 @@ export default defineConfig({
         theme_color: '#000000',
         background_color: '#000000',
         display: 'standalone',
+        display_override: ['window-controls-overlay', 'standalone'],
         icons: [
           {
             src: 'logo.svg',
