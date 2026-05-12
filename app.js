@@ -19,10 +19,61 @@ let direction = 'forward';
 
 let isFirstLoad = true;
 
+// 2. Calibration Visuals
+function setupCalibrationVisuals() {
+    function resetAnimations(el) {
+        if (!el) return;
+        const papers = el.querySelectorAll('.paper');
+        papers.forEach(p => {
+            p.style.animation = 'none';
+            void p.offsetWidth;
+            p.style.animation = '';
+        });
+    }
+
+    function updateTrayAnim() {
+        const trayInputs = document.getElementsByName('tray');
+        const container = document.querySelector('.tray-visual-container');
+        if (!container) return;
+        
+        const value = Array.from(trayInputs).find(i => i.checked).value;
+        container.classList.remove('show-facedown', 'show-faceup');
+        container.classList.add('show-' + value);
+
+        // Reset the newly shown box
+        const activeBox = value === 'facedown' ? document.getElementById('facedownBox') : document.getElementById('faceupBox');
+        resetAnimations(activeBox);
+    }
+
+    function updateFlipAnim() {
+        const flipInputs = document.getElementsByName('flip');
+        const container = document.querySelector('.flip-visual-container');
+        if (!container) return;
+
+        const value = Array.from(flipInputs).find(i => i.checked).value;
+        container.classList.remove('show-long', 'show-short');
+        container.classList.add('show-' + value);
+
+        // Reset the newly shown box
+        const activeBox = value === 'long' ? document.getElementById('longBox') : document.getElementById('shortBox');
+        resetAnimations(activeBox);
+    }
+
+    const trayInputs = document.getElementsByName('tray');
+    const flipInputs = document.getElementsByName('flip');
+    trayInputs.forEach(input => input.addEventListener('change', updateTrayAnim));
+    flipInputs.forEach(input => input.addEventListener('change', updateFlipAnim));
+
+    // Initial state
+    updateTrayAnim();
+    updateFlipAnim();
+}
+
 // Initialization
 function init() {
     loadSettings();
     updateWizardUI();
+    setupCalibrationVisuals();
 }
 
 // 1. Navigation Logic

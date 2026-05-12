@@ -64,6 +64,20 @@
                         <label>
                             <input type="radio" name="tray" value="faceup"> Last Page First (Face Up)
                         </label>
+                        <div class="visual-container tray-visual-container">
+                            <!-- Face Down Box -->
+                            <div id="facedownBox" class="anim-box tray-box tray-facedown">
+                                <div class="paper p1">1</div>
+                                <div class="paper p2">2</div>
+                                <div class="paper p3">3</div>
+                            </div>
+                            <!-- Face Up Box -->
+                            <div id="faceupBox" class="anim-box tray-box tray-faceup">
+                                <div class="paper p1">3</div>
+                                <div class="paper p2">2</div>
+                                <div class="paper p3">1</div>
+                            </div>
+                        </div>
                     </div>
                     <div class="option-group">
                         <strong style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-secondary);">Flip
@@ -74,6 +88,16 @@
                         <label>
                             <input type="radio" name="flip" value="short"> Short Edge (Calendar)
                         </label>
+                        <div class="visual-container flip-visual-container">
+                            <!-- Long Edge Box -->
+                            <div id="longBox" class="anim-box flip-box flip-long">
+                                <div class="paper p-flip">A</div>
+                            </div>
+                            <!-- Short Edge Box -->
+                            <div id="shortBox" class="anim-box flip-box flip-short">
+                                <div class="paper p-flip">A</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
