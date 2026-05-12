@@ -1,121 +1,143 @@
 import { PDFDocument, degrees } from 'pdf-lib';
 
-const dropzone = document.getElementById('dropzone');
+// DOM Elements
+const wizard = document.querySelector('.wizard-container');
+const steps = document.querySelectorAll('.step');
+const nextBtn = document.getElementById('nextBtn');
+const backBtn = document.getElementById('backBtn');
+const dots = document.querySelectorAll('#dots div');
 const fileInput = document.getElementById('fileInput');
-const loading = document.getElementById('loading');
-const results = document.getElementById('results');
+const dropzone = document.getElementById('dropzone');
 
-// Modal Logic
-const settingsModal = document.getElementById('settingsModal');
-const oobeModal = document.getElementById('oobeModal');
+let currentStep = 1;
+let totalSteps = steps.length;
+let pdfFile = null;
+let side1BlobUrl = null;
+let side2BlobUrl = null;
 
-document.getElementById('openSettingsBtn').addEventListener('click', () => settingsModal.classList.add('open'));
-document.getElementById('closeSettingsBtn').addEventListener('click', () => settingsModal.classList.remove('open'));
-settingsModal.addEventListener('click', (e) => {
-    if (e.target === settingsModal) settingsModal.classList.remove('open');
-});
-
-// Settings Elements
-const outputTrayRadios = document.querySelectorAll('input[name="outputTray"]');
-const flipEdgeRadios = document.querySelectorAll('input[name="flipEdge"]');
-
-// 1. Load calibration settings from localStorage
-const savedTray = localStorage.getItem('duplex_tray');
-const savedFlip = localStorage.getItem('duplex_flip');
-
-if (savedTray && savedFlip) {
-    outputTrayRadios.forEach(r => r.checked = (r.value === savedTray));
-    flipEdgeRadios.forEach(r => r.checked = (r.value === savedFlip));
-} else {
-    // Show OOBE on first visit
-    oobeModal.classList.add('open');
+// Initialization
+function init() {
+    loadSettings();
+    updateWizardUI();
 }
 
-// OOBE Logic
-document.getElementById('finishOobeBtn').addEventListener('click', () => {
-    const oobeTrayVal = document.querySelector('input[name="oobeTray"]:checked').value;
-    const oobeFlipVal = document.querySelector('input[name="oobeFlip"]:checked').value;
-    
-    // Save to localStorage
-    localStorage.setItem('duplex_tray', oobeTrayVal);
-    localStorage.setItem('duplex_flip', oobeFlipVal);
-    
-    // Sync to main settings
-    outputTrayRadios.forEach(r => r.checked = (r.value === oobeTrayVal));
-    flipEdgeRadios.forEach(r => r.checked = (r.value === oobeFlipVal));
-    
-    // Close OOBE
-    oobeModal.classList.remove('open');
-});
-
-// 2. Save settings automatically when changed in main settings
-outputTrayRadios.forEach(r => {
-    r.addEventListener('change', () => {
-        const val = document.querySelector('input[name="outputTray"]:checked').value;
-        localStorage.setItem('duplex_tray', val);
+// 1. Navigation Logic
+function updateWizardUI() {
+    steps.forEach((step, idx) => {
+        const stepNum = idx + 1;
+        step.classList.remove('active', 'past');
+        if (stepNum === currentStep) {
+            step.classList.add('active');
+        } else if (stepNum < currentStep) {
+            step.classList.add('past');
+        }
     });
-});
-flipEdgeRadios.forEach(r => {
-    r.addEventListener('change', () => {
-        const val = document.querySelector('input[name="flipEdge"]:checked').value;
-        localStorage.setItem('duplex_flip', val);
+
+    // Update Dots
+    dots.forEach((dot, idx) => {
+        dot.style.background = (idx + 1 <= currentStep) ? 'var(--accent-color)' : 'var(--border-color)';
     });
+
+    // Update Buttons
+    backBtn.style.visibility = (currentStep > 1 && currentStep < totalSteps) ? 'visible' : 'hidden';
+    
+    if (currentStep === 1) {
+        nextBtn.innerText = "Continue";
+        nextBtn.disabled = !pdfFile;
+    } else if (currentStep === totalSteps) {
+        nextBtn.innerText = "Start Over";
+        nextBtn.disabled = false;
+    } else {
+        nextBtn.innerText = "Continue";
+        nextBtn.disabled = false;
+    }
+}
+
+nextBtn.addEventListener('click', () => {
+    if (currentStep === 1 && pdfFile) {
+        processFile(pdfFile);
+    } else if (currentStep === totalSteps) {
+        resetWizard();
+    } else {
+        currentStep++;
+        updateWizardUI();
+    }
 });
 
-// 3. Handle Drag & Drop
-document.addEventListener('dragenter', () => {
-    // Hide results immediately when a user starts dragging a new file over the page
-    results.classList.add('hidden');
+backBtn.addEventListener('click', () => {
+    if (currentStep > 1) {
+        currentStep--;
+        updateWizardUI();
+    }
 });
 
-dropzone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropzone.classList.add('dragover');
+function resetWizard() {
+    currentStep = 1;
+    pdfFile = null;
+    fileInput.value = '';
+    document.getElementById('welcomeTitle').innerText = "Welcome to DuplexMe!";
+    updateWizardUI();
+}
+
+// 2. Settings Logic
+function loadSettings() {
+    const savedTray = localStorage.getItem('duplex_tray') || 'facedown';
+    const savedFlip = localStorage.getItem('duplex_flip') || 'long';
+
+    document.querySelectorAll('input[name="tray"]').forEach(r => r.checked = (r.value === savedTray));
+    document.querySelectorAll('input[name="flip"]').forEach(r => r.checked = (r.value === savedFlip));
+}
+
+function saveSettings() {
+    const tray = document.querySelector('input[name="tray"]:checked').value;
+    const flip = document.querySelector('input[name="flip"]:checked').value;
+    localStorage.setItem('duplex_tray', tray);
+    localStorage.setItem('duplex_flip', flip);
+}
+
+// 3. File Handling
+dropzone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+        handleFileSelect(e.target.files[0]);
+    }
 });
 
-dropzone.addEventListener('dragleave', () => {
-    dropzone.classList.remove('dragover');
-});
-
+dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
 dropzone.addEventListener('drop', (e) => {
     e.preventDefault();
     dropzone.classList.remove('dragover');
     if (e.dataTransfer.files.length > 0) {
-        processFile(e.dataTransfer.files[0]);
+        handleFileSelect(e.dataTransfer.files[0]);
     }
 });
 
-dropzone.addEventListener('click', () => {
-    results.classList.add('hidden');
-    fileInput.click();
-});
-
-fileInput.addEventListener('change', (e) => {
-    if (e.target.files.length > 0) {
-        processFile(e.target.files[0]);
-    }
-});
-
-// Track generated URLs so we can revoke them and prevent memory leaks
-let side1BlobUrl = null;
-let side2BlobUrl = null;
-
-// 4. Core Logic: Process the PDF
-async function processFile(file) {
+function handleFileSelect(file) {
     if (file.type !== 'application/pdf') {
-        alert('Please drop a valid PDF file.');
+        alert('Please select a valid PDF file.');
         return;
     }
+    pdfFile = file;
+    document.getElementById('welcomeTitle').innerText = `Ready: ${file.name}`;
+    nextBtn.disabled = false;
+    // Auto-advance after a small delay for better feel
+    setTimeout(() => {
+        if (currentStep === 1) nextBtn.click();
+    }, 600);
+}
 
-    loading.classList.remove('hidden');
-    results.classList.add('hidden');
+// 4. Core PDF Processing
+async function processFile(file) {
+    saveSettings();
+    const traySetting = document.querySelector('input[name="tray"]:checked').value;
+    const flipSetting = document.querySelector('input[name="flip"]:checked').value;
 
     try {
         const arrayBuffer = await file.arrayBuffer();
         const pdfDoc = await PDFDocument.load(arrayBuffer);
         let pageCount = pdfDoc.getPageCount();
 
-        // Rule: If total pages is odd, append a blank page so odd/even sides match physically.
         if (pageCount % 2 !== 0) {
             pdfDoc.addPage();
             pageCount++;
@@ -127,44 +149,23 @@ async function processFile(file) {
         const side1Indices = [];
         let side2Indices = [];
 
-        const traySetting = document.querySelector('input[name="outputTray"]:checked').value;
-
-        // Split indices into Side 1 and Side 2
         for (let i = 0; i < pageCount; i++) {
             if (traySetting === 'faceup') {
-                // Face Up (Inkjet): Print Evens on Side 1, Odds on Side 2
-                // So the final printed face (Side 2) will be the Odd pages, making them face up!
-                if (i % 2 === 0) {
-                    side2Indices.push(i); // 0, 2, 4 (Pages 1, 3, 5) -> Side 2
-                } else {
-                    side1Indices.push(i); // 1, 3, 5 (Pages 2, 4, Blank) -> Side 1
-                }
+                if (i % 2 === 0) side2Indices.push(i);
+                else side1Indices.push(i);
             } else {
-                // Face Down (Laser): Print Odds on Side 1, Evens on Side 2
-                if (i % 2 === 0) {
-                    side1Indices.push(i); // 0, 2, 4 (Pages 1, 3, 5) -> Side 1
-                } else {
-                    side2Indices.push(i); // 1, 3, 5 (Pages 2, 4, Blank) -> Side 2
-                }
+                if (i % 2 === 0) side1Indices.push(i);
+                else side2Indices.push(i);
             }
         }
 
-        // The deterministic rule for manual duplexing:
-        // Face Down (Laser): Requires Side 2 to be reversed.
-        // Face Up (Inkjet): Requires Side 2 to be in normal (forward) order.
-        if (traySetting === 'facedown') {
-            side2Indices.reverse();
-        }
+        if (traySetting === 'facedown') side2Indices.reverse();
 
-        // Copy Side 1 pages
         const copiedSide1 = await side1Doc.copyPages(pdfDoc, side1Indices);
         copiedSide1.forEach(p => side1Doc.addPage(p));
 
-        // Copy Side 2 pages and apply rotation if needed
         const copiedSide2 = await side2Doc.copyPages(pdfDoc, side2Indices);
-        const flipSetting = document.querySelector('input[name="flipEdge"]:checked').value;
         const shouldRotate = flipSetting === 'short';
-        
         copiedSide2.forEach(p => {
             if (shouldRotate) {
                 const currentRotation = p.getRotation().angle;
@@ -173,111 +174,79 @@ async function processFile(file) {
             side2Doc.addPage(p);
         });
 
-        // Save new documents to bytes
         const side1Bytes = await side1Doc.save();
         const side2Bytes = await side2Doc.save();
 
-        // Create Blobs
-        const side1Blob = new Blob([side1Bytes], { type: 'application/pdf' });
-        const side2Blob = new Blob([side2Bytes], { type: 'application/pdf' });
-
-        // Revoke old URLs
         if (side1BlobUrl) URL.revokeObjectURL(side1BlobUrl);
         if (side2BlobUrl) URL.revokeObjectURL(side2BlobUrl);
 
-        // Generate new URLs
-        side1BlobUrl = URL.createObjectURL(side1Blob);
-        side2BlobUrl = URL.createObjectURL(side2Blob);
+        side1BlobUrl = URL.createObjectURL(new Blob([side1Bytes], { type: 'application/pdf' }));
+        side2BlobUrl = URL.createObjectURL(new Blob([side2Bytes], { type: 'application/pdf' }));
 
-        // Setup Download and Print Buttons
-        if (traySetting === 'faceup') {
-            setupButtons('Side1', side1BlobUrl, 'Side1_EvenPages.pdf');
-            setupButtons('Side2', side2BlobUrl, 'Side2_OddPages.pdf');
-            
-            // UI text update for clarity
-            document.querySelector('#results .result-section:nth-child(1) h2').innerText = "Side 1 (Even Pages)";
-            document.querySelector('#results .result-section:nth-child(2) h2').innerText = "Side 2 (Odd Pages)";
-        } else {
-            setupButtons('Side1', side1BlobUrl, 'Side1_OddPages.pdf');
-            setupButtons('Side2', side2BlobUrl, 'Side2_EvenPages.pdf');
-            
-            document.querySelector('#results .result-section:nth-child(1) h2').innerText = "Side 1 (Odd Pages)";
-            document.querySelector('#results .result-section:nth-child(2) h2').innerText = "Side 2 (Even Pages)";
-        }
-
-        loading.classList.add('hidden');
-        results.classList.remove('hidden');
+        setupActions(side1BlobUrl, side2BlobUrl, traySetting);
+        
+        currentStep = 3; // Move to Side 1 screen
+        updateWizardUI();
 
     } catch (error) {
         console.error(error);
-        alert('An error occurred while processing the PDF. Please check the console for details.');
-        loading.classList.add('hidden');
+        alert('Error processing PDF.');
     }
 }
 
-// 5. Button action helpers
-function setupButtons(sideName, blobUrl, filename) {
-    const downloadBtn = document.getElementById(`download${sideName}`);
-    const printBtn = document.getElementById(`print${sideName}`);
+function setupActions(url1, url2, tray) {
+    const s1Title = document.getElementById('side1Title');
+    const s2Title = document.getElementById('side2Title');
+    
+    if (tray === 'faceup') {
+        s1Title.innerText = "Side 1 (Even Pages)";
+        s2Title.innerText = "Side 2 (Odd Pages)";
+        setupButtons('Side1', url1, 'Side1_Even.pdf');
+        setupButtons('Side2', url2, 'Side2_Odd.pdf');
+    } else {
+        s1Title.innerText = "Side 1 (Odd Pages)";
+        s2Title.innerText = "Side 2 (Even Pages)";
+        setupButtons('Side1', url1, 'Side1_Odd.pdf');
+        setupButtons('Side2', url2, 'Side2_Even.pdf');
+    }
+}
 
-    downloadBtn.onclick = () => {
+function setupButtons(side, url, filename) {
+    document.getElementById(`download${side}`).onclick = () => {
         const a = document.createElement('a');
-        a.href = blobUrl;
+        a.href = url;
         a.download = filename;
         a.click();
     };
 
-    printBtn.onclick = () => {
-        // Create an iframe for printing
+    document.getElementById(`print${side}`).onclick = () => {
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
         const iframe = document.createElement('iframe');
-        
-        // Safari and others: Do NOT use display: none. 
-        // We use absolute positioning to hide it from the user but keep it "visible" for the browser.
-        iframe.style.position = 'fixed';
-        iframe.style.right = '0';
-        iframe.style.bottom = '0';
-        iframe.style.width = '0';
-        iframe.style.height = '0';
-        iframe.style.visibility = 'hidden';
-        iframe.style.border = 'none';
-        iframe.src = blobUrl;
+        Object.assign(iframe.style, {
+            position: 'fixed', right: '0', bottom: '0', width: '0', height: '0',
+            visibility: 'hidden', border: 'none'
+        });
+        iframe.src = url;
         document.body.appendChild(iframe);
-        
         iframe.onload = () => {
-            // Give the browser time to initialize the PDF viewer
-            // Safari often needs a bit more time than Chrome
-            const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
             const delay = isSafari ? 2000 : 500;
-
             setTimeout(() => {
                 try {
                     iframe.contentWindow.focus();
-                    
-                    // Specific check for Safari to use a more robust print trigger if needed
                     if (isSafari) {
-                        // Some Safari versions prefer execCommand for iframes
                         const success = iframe.contentWindow.document.execCommand('print', false, null);
-                        if (!success) {
-                            iframe.contentWindow.print();
-                        }
+                        if (!success) iframe.contentWindow.print();
                     } else {
                         iframe.contentWindow.print();
                     }
                 } catch (e) {
-                    console.error('Print failed, falling back to new window:', e);
-                    window.open(blobUrl, '_blank');
+                    window.open(url, '_blank');
                 }
-                
-                // Hide immediately to prevent zoom buttons from lingering
                 iframe.style.display = 'none';
-                
-                // Clean up the iframe after a delay
-                setTimeout(() => {
-                    if (document.body.contains(iframe)) {
-                        document.body.removeChild(iframe);
-                    }
-                }, 10000); 
+                setTimeout(() => { if (document.body.contains(iframe)) document.body.removeChild(iframe); }, 2000);
             }, delay);
         };
     };
 }
+
+init();

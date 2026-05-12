@@ -4,343 +4,349 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DuplexMe!</title>
-    <meta name="google-site-verification" content="GteivobFminUdnOixa9GqifC8HxBqiCnvwo3A9UEpbI" />
-    <meta name="description"
-        content="A minimalist, browser-based PDF utility for perfect manual duplex printing. Easily split PDFs into Side 1 and Side 2.">
-    <meta name="keywords"
-        content="duplex printing, manual duplex, pdf splitter, print odd and even pages, pdf duplex printer, free pdf tool">
-    <meta name="author" content="MiserereMei">
-
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://misereremei.github.io/duplex-me/">
-    <meta property="og:title" content="DuplexMe! - Perfect Manual Duplex Printing">
-    <meta property="og:description"
-        content="A minimalist, browser-based PDF utility for perfect manual duplex printing. Easily split PDFs into Side 1 and Side 2.">
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://misereremei.github.io/duplex-me/">
-    <meta property="twitter:title" content="DuplexMe! - Perfect Manual Duplex Printing">
-    <meta property="twitter:description"
-        content="A minimalist, browser-based PDF utility for perfect manual duplex printing. Easily split PDFs into Side 1 and Side 2.">
-
+    <title>DuplexMe! - Manual Duplex PDF Tool</title>
+    <meta name="description" content="A minimalist, browser-based PDF utility for perfect manual duplex printing.">
+    <link rel="icon" type="image/svg+xml" href="/logo.circle.svg" />
+    
     <meta name="theme-color" content="#F4F4F5" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
-
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <link rel="icon" type="image/svg+xml" href="/logo.circle.svg" />
-    <!-- Using Vite to bundle pdf-lib locally -->
     <style>
         :root {
-            --bg-color: #F4F4F5;
-            /* Light mode bg */
-            --surface-color: #FFFFFF;
-            --text-color: #18181B;
-            --text-muted: #52525B;
-            --border-color: #E4E4E7;
-            --glow-color: rgba(6, 182, 212, 0.4);
-            --glow-border: #06B6D4;
+            --accent-color: #007AFF;
+            --bg-gradient: linear-gradient(135deg, #e2e2e2 0%, #ffffff 100%);
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --text-color: #1d1d1f;
+            --text-secondary: #86868b;
+            --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            --border-color: rgba(0, 0, 0, 0.1);
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg-color: #000000;
-                --surface-color: #18181B;
-                --text-color: #E4E4E7;
-                --text-muted: #A1A1AA;
-                --border-color: #27272A;
-                --glow-color: rgba(6, 182, 212, 0.5);
+                --bg-gradient: radial-gradient(circle at 50% 50%, #1c1c1e 0%, #000000 100%);
+                --glass-bg: rgba(28, 28, 30, 0.75);
+                --text-color: #f5f5f7;
+                --text-secondary: #a1a1aa;
+                --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+                --border-color: rgba(255, 255, 255, 0.1);
             }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-            background-color: var(--bg-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-gradient);
             color: var(--text-color);
-            line-height: 1.5;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .box {
-            border: 2px dashed var(--border-color);
-            padding: 2rem;
-            text-align: center;
-            margin: 1rem 0;
-            cursor: pointer;
-            border-radius: 8px;
-            background-color: var(--surface-color);
-            transition: all 0.3s ease;
-        }
-
-        .box.dragover {
-            border-color: var(--glow-border);
-            box-shadow: 0 0 20px var(--glow-color);
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .result-section {
-            margin-top: 1.5rem;
-            padding: 1.5rem;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background-color: var(--surface-color);
-        }
-
-        .actions {
-            margin-top: 1.2rem;
-            display: flex;
-            gap: 1rem;
-        }
-
-        button {
-            padding: 0.6rem 1.2rem;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 500;
-            border: 1px solid var(--border-color);
-            background-color: var(--surface-color);
-            color: var(--text-color);
-            border-radius: 6px;
-            transition: all 0.2s ease;
-        }
-
-        button:hover {
-            border-color: var(--glow-border);
-            box-shadow: 0 0 15px var(--glow-color);
-            transform: translateY(-1px);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        /* Accent Buttons */
-        button.accent-btn {
-            background-color: var(--glow-border);
-            color: #FFFFFF;
-            border-color: var(--glow-border);
-            font-weight: 600;
-        }
-
-        button.accent-btn:hover {
-            background-color: #0891B2;
-            border-color: #0891B2;
-            color: #FFFFFF;
-        }
-
-        /* Modal Styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 100;
+            height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease;
-            backdrop-filter: blur(2px);
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .modal-overlay.open {
+        /* Wizard Container */
+        .wizard-container {
+            width: 100%;
+            max-width: 680px;
+            height: 520px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border-radius: 32px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Step Content */
+        .wizard-steps {
+            flex: 1;
+            position: relative;
+        }
+
+        .step {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            opacity: 0;
+            transform: translateX(40px);
+            pointer-events: none;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .step.active {
             opacity: 1;
+            transform: translateX(0);
             pointer-events: auto;
         }
 
-        .modal-content {
-            background-color: var(--surface-color);
-            padding: 2rem;
-            border-radius: 12px;
-            max-width: 400px;
-            width: 90%;
-            transform: translateY(-20px);
-            transition: transform 0.2s ease;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--border-color);
-        }
-
-        .modal-overlay.open .modal-content {
-            transform: translateY(0);
+        .step.past {
+            opacity: 0;
+            transform: translateX(-40px);
         }
 
         /* Typography */
-        p.muted {
-            color: var(--text-muted);
-            margin-bottom: 2rem;
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+            letter-spacing: -0.02em;
         }
 
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--text-color);
+        p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 480px;
+            line-height: 1.4;
         }
 
-        strong {
-            color: var(--text-color);
+        /* Drag & Drop Zone */
+        .dropzone {
+            margin-top: 2rem;
+            width: 100%;
+            height: 180px;
+            border: 2px dashed var(--border-color);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.05);
         }
 
-        /* Animations */
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .dropzone:hover, .dropzone.dragover {
+            background: rgba(0, 122, 255, 0.1);
+            border-color: var(--accent-color);
         }
 
-        #results:not(.hidden) {
-            animation: slideIn 0.3s ease-out;
+        .dropzone svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1rem;
+            color: var(--accent-color);
         }
 
-        .header-container {
+        /* Controls */
+        .wizard-footer {
+            padding: 1.5rem 2rem;
+            border-top: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
+            background: rgba(255, 255, 255, 0.02);
         }
 
-        .header-container h1 {
-            margin: 0;
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .btn-group button {
+            width: 100%;
+        }
+
+        button {
+            padding: 0.8rem 1.8rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 14px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button.primary {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        button.primary:hover {
+            filter: brightness(1.1);
+        }
+
+        button.secondary {
+            background: var(--border-color);
+            color: var(--text-color);
+        }
+
+        button.ghost {
+            background: transparent;
+            color: var(--accent-color);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Calibration Grid */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 2rem;
+            width: 100%;
+            text-align: left;
+        }
+
+        .option-group {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .option-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin: 0.6rem 0;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        /* Success Icon */
+        .success-checkmark {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1.5rem;
+            color: #34C759;
+        }
+
+        .hidden {
+            display: none !important;
         }
 
         @media print {
-            body * {
-                visibility: hidden;
-            }
-            /* If we ever want to show something specific during print */
-            .print-only {
-                visibility: visible;
-                position: absolute;
-                left: 0;
-                top: 0;
-            }
+            body * { visibility: hidden; }
         }
     </style>
 </head>
 
 <body>
-    <div class="header-container">
-        <h1>DuplexMe!</h1>
-        <button id="openSettingsBtn">Calibration</button>
-    </div>
-    <p class="muted">Convert your PDFs into Side 1 and Side 2 files for manual duplex printing.</p>
-
-    <!-- Modal -->
-    <div id="settingsModal" class="modal-overlay">
-        <div class="modal-content">
-            <h2 style="margin-top: 0;">Printer Calibration</h2>
-            <p class="muted" style="margin-bottom: 1.5rem; font-size: 0.9rem;">Settings auto-save to local storage.</p>
-
-            <div style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
-                <strong>1. Output Tray Stacking</strong><br>
-                <label style="margin-top: 0.5rem;">
-                    <input type="radio" name="outputTray" value="facedown" checked>
-                    Face Down (Laser)
-                </label>
-                <label>
-                    <input type="radio" name="outputTray" value="faceup">
-                    Face Up (Inkjet)
-                </label>
+    <div class="wizard-container">
+        <div class="wizard-steps">
+            <!-- Step 1: Welcome & Upload -->
+            <div id="step1" class="step active">
+                <h1 id="welcomeTitle">Welcome to DuplexMe!</h1>
+                <p>Convert any PDF into perfectly ordered Side 1 and Side 2 files for manual duplex printing.</p>
+                <div id="dropzone" class="dropzone">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <strong>Choose a PDF file</strong>
+                    <span style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.4rem;">or drag and drop it here</span>
+                    <input type="file" id="fileInput" accept="application/pdf" class="hidden">
+                </div>
             </div>
 
-            <div style="margin-bottom: 2rem;">
-                <strong>2. Flip Orientation</strong><br>
-                <label style="margin-top: 0.5rem;">
-                    <input type="radio" name="flipEdge" value="long" checked>
-                    Long Edge (Book)
-                </label>
-                <label>
-                    <input type="radio" name="flipEdge" value="short">
-                    Short Edge (Calendar)
-                </label>
+            <!-- Step 2: Calibration -->
+            <div id="step2" class="step">
+                <h1>Printer Calibration</h1>
+                <p>Let's make sure your pages come out in the right order and orientation.</p>
+                
+                <div class="options-grid">
+                    <div class="option-group">
+                        <strong style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-secondary);">Output Tray</strong>
+                        <label>
+                            <input type="radio" name="tray" value="facedown" checked> Face Down (Laser)
+                        </label>
+                        <label>
+                            <input type="radio" name="tray" value="faceup"> Face Up (Inkjet)
+                        </label>
+                    </div>
+                    <div class="option-group">
+                        <strong style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-secondary);">Flip Edge</strong>
+                        <label>
+                            <input type="radio" name="flip" value="long" checked> Long Edge (Book)
+                        </label>
+                        <label>
+                            <input type="radio" name="flip" value="short"> Short Edge (Calendar)
+                        </label>
+                    </div>
+                </div>
             </div>
 
-            <button id="closeSettingsBtn" style="width: 100%;">Done</button>
-        </div>
-    </div>
-
-    <!-- OOBE Modal -->
-    <div id="oobeModal" class="modal-overlay">
-        <div class="modal-content">
-            <h2 style="margin-top: 0;">Welcome to DuplexMe!</h2>
-            <p>Manual duplex printing can be a nightmare of upside-down pages and backwards books.
-                <strong>DuplexMe!</strong> fixes this by perfectly splitting your PDFs into Side 1 and Side 2.</p>
-            <p class="muted" style="margin-bottom: 1.5rem; font-size: 0.9rem;">Before we start, let's calibrate for your
-                specific printer so you never have to guess again.</p>
-
-            <div style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
-                <strong>1. Output Tray Stacking</strong><br>
-                <label style="margin-top: 0.5rem;">
-                    <input type="radio" name="oobeTray" value="facedown" checked>
-                    Face Down (Laser)
-                </label>
-                <label>
-                    <input type="radio" name="oobeTray" value="faceup">
-                    Face Up (Inkjet)
-                </label>
+            <!-- Step 3: Side 1 -->
+            <div id="step3" class="step">
+                <h1 id="side1Title">Side 1 (Odd Pages)</h1>
+                <p id="side1Text">Step 1: Print this file normally. Keep the printed pages in the output tray.</p>
+                
+                <div class="btn-group" style="margin-top: 2rem;">
+                    <button id="printSide1" class="primary">Print Now</button>
+                    <button id="downloadSide1" class="secondary">Download</button>
+                </div>
             </div>
 
-            <div style="margin-bottom: 2rem;">
-                <strong>2. Flip Orientation</strong><br>
-                <label style="margin-top: 0.5rem;">
-                    <input type="radio" name="oobeFlip" value="long" checked>
-                    Long Edge (Book)
-                </label>
-                <label>
-                    <input type="radio" name="oobeFlip" value="short">
-                    Short Edge (Calendar)
-                </label>
+            <!-- Step 4: The Flip Instructions -->
+            <div id="step4" class="step">
+                <h1>Ready for Side 2?</h1>
+                <p id="flipInstructionText">Take the printed stack from the tray and place it back into the paper feeder.</p>
+                
+                <div style="margin-top: 2rem; background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 20px; border: 1px solid var(--border-color); width: 100%;">
+                    <strong style="color: var(--accent-color);">Pro Tip:</strong>
+                    <p style="font-size: 0.9rem; margin-top: 0.5rem;" id="tipText">Don't rotate or shuffle the pages. Just move the stack as is.</p>
+                </div>
             </div>
 
-            <button id="finishOobeBtn" style="width: 100%;">Save & Start</button>
-        </div>
-    </div>
+            <!-- Step 5: Side 2 -->
+            <div id="step5" class="step">
+                <h1 id="side2Title">Side 2 (Even Pages)</h1>
+                <p id="side2Text">Final Step: Print these pages on the back of your first stack.</p>
+                
+                <div class="btn-group" style="margin-top: 2rem;">
+                    <button id="printSide2" class="primary">Print Now</button>
+                    <button id="downloadSide2" class="secondary">Download</button>
+                </div>
+            </div>
 
-    <div id="dropzone" class="box">
-        <strong>Drag & Drop your PDF here</strong>
-        <p>or click to select file</p>
-        <input type="file" id="fileInput" accept="application/pdf" class="hidden">
-    </div>
-
-    <div id="loading" class="hidden">
-        <em>Processing PDF... Please wait.</em>
-    </div>
-
-    <div id="results" class="hidden">
-        <div class="result-section">
-            <h2>Side 1 (Odd Pages)</h2>
-            <p>Step 1: Print this file normally.</p>
-            <div class="actions">
-                <button id="downloadSide1">Download Side 1</button>
-                <button id="printSide1" class="accent-btn">Print Side 1</button>
+            <!-- Step 6: Success -->
+            <div id="step6" class="step">
+                <svg class="success-checkmark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h1>All Done!</h1>
+                <p>Your manual duplex document has been successfully processed.</p>
             </div>
         </div>
 
-        <div class="result-section">
-            <h2>Side 2 (Even Pages)</h2>
-            <p>Step 2: Take the printed stack from Side 1, put it back into the paper tray, and print this file.</p>
-            <div class="actions">
-                <button id="downloadSide2">Download Side 2</button>
-                <button id="printSide2" class="accent-btn">Print Side 2</button>
+        <!-- Wizard Footer -->
+        <div class="wizard-footer">
+            <button id="backBtn" class="ghost" style="visibility: hidden;">Back</button>
+            <div id="dots" style="display: flex; gap: 6px;">
+                <div style="width: 6px; height: 6px; border-radius: 50%; background: var(--accent-color);"></div>
+                <div style="width: 6px; height: 6px; border-radius: 50%; background: var(--border-color);"></div>
+                <div style="width: 6px; height: 6px; border-radius: 50%; background: var(--border-color);"></div>
+                <div style="width: 6px; height: 6px; border-radius: 50%; background: var(--border-color);"></div>
+                <div style="width: 6px; height: 6px; border-radius: 50%; background: var(--border-color);"></div>
+                <div style="width: 6px; height: 6px; border-radius: 50%; background: var(--border-color);"></div>
             </div>
+            <button id="nextBtn" class="primary" disabled>Continue</button>
         </div>
     </div>
 
