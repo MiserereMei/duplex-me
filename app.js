@@ -35,14 +35,14 @@ function setupCalibrationVisuals() {
         const trayInputs = document.getElementsByName('tray');
         const container = document.querySelector('.tray-visual-container');
         if (!container) return;
-        
+
         const value = Array.from(trayInputs).find(i => i.checked).value;
         container.classList.remove('show-facedown', 'show-faceup');
         container.classList.add('show-' + value);
 
         // Reset the newly shown box
         const activeBox = value === 'facedown' ? document.getElementById('facedownBox') : document.getElementById('faceupBox');
-        resetAnimations(activeBox);
+        //resetAnimations(activeBox);
     }
 
     function updateFlipAnim() {
@@ -56,7 +56,7 @@ function setupCalibrationVisuals() {
 
         // Reset the newly shown box
         const activeBox = value === 'long' ? document.getElementById('longBox') : document.getElementById('shortBox');
-        resetAnimations(activeBox);
+        //resetAnimations(activeBox);
     }
 
     const trayInputs = document.getElementsByName('tray');
@@ -259,7 +259,7 @@ async function processFile(file) {
         side2BlobUrl = URL.createObjectURL(new Blob([side2Bytes], { type: 'application/pdf' }));
 
         setupActions(side1BlobUrl, side2BlobUrl, traySetting);
-        
+
         currentStep = 3; // Move to Side 1 screen
         updateWizardUI();
 
@@ -272,7 +272,7 @@ async function processFile(file) {
 function setupActions(url1, url2, tray) {
     const s1Title = document.getElementById('side1Title');
     const s2Title = document.getElementById('side2Title');
-    
+
     if (tray === 'faceup') {
         s1Title.innerText = "Side 1 (Even Pages)";
         s2Title.innerText = "Side 2 (Odd Pages)";
