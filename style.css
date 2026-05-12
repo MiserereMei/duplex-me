@@ -398,6 +398,11 @@ button:disabled {
         font-size: 1.8rem;
     }
 
+    .options-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
     .step:not(:has(.ios-back-btn)) h1 {
         margin-top: 20px;
     }
